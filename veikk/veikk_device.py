@@ -17,6 +17,37 @@ class VeikkDevice(_VeikkDevice):
                  device: InputDevice,
                  event_loop: EventLoop,
                  command_map: Mapping[KeyCode, Command] = None) -> None:
+
+        # simple mapping for testing
+        from evdev import ecodes
+        from veikk.command.program_command import ProgramCommand
+        from veikk.command.keycombo_command import KeyComboCommand
+        from veikk.command.command import CommandTriggerMap, CommandTrigger
+        command_map = {
+            ecodes.SYN_REPORT: KeyComboCommand([]),
+            ecodes.BTN_0: ProgramCommand(['echo', 'Hello, world!', ';', 'read'],
+                                         True),
+            ecodes.BTN_1: ProgramCommand(['htop'], True,
+                                         start_new_session=True),
+            ecodes.BTN_2: KeyComboCommand([ecodes.KEY_LEFTCTRL,
+                                           ecodes.KEY_RIGHTSHIFT,
+                                           ecodes.KEY_E]),
+            ecodes.BTN_3: ProgramCommand(['krita']),
+            ecodes.BTN_4: ProgramCommand([
+                'xvkbd', '-no-jump-pointer', '-text', 'Hello, world'],
+                trigger_type_map=CommandTriggerMap(CommandTrigger.KEYUP)),
+
+            # TODO: this fails because Google Chrome doesn't like to be run
+            #   as root; scripts should not be run as root in general;
+            #   should be able to get current user from systemd unit specifiers
+            ecodes.BTN_5: ProgramCommand(['google-chrome'])
+        }
+        capabilities = {
+            ecodes.EV_KEY: [ecodes.KEY_LEFTCTRL,
+                            ecodes.KEY_RIGHTSHIFT,
+                            ecodes.KEY_E]
+        }
+
         if command_map is None:
             command_map = {}
 
@@ -25,10 +56,8 @@ class VeikkDevice(_VeikkDevice):
 
         # create a uinput device that has the properties of the original,
         # except the events
-        self._uinput_device \
-            = UInput.from_device(self._device,
-                                 filtered_types=[ecodes.EV_SYN, ecodes.EV_KEY],
-                                 name=f'Mapped {self._device.name}')
+        self._uinput_device = UInput(events=capabilities,
+                                     name=f'Mapped {self._device.name}')
 
         # get exclusive access to device (i.e., the events will not get used
         # by the display server)
@@ -51,7 +80,7 @@ class VeikkDevice(_VeikkDevice):
         """
         try:
             for event in self._device.read():
-                self._command_map.get(event.code, noop)\
+                self._command_map.get(event.code, noop) \
                     .execute(event, self._uinput_device)
         except OSError:
             self.cleanup()

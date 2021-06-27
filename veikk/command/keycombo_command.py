@@ -20,7 +20,7 @@ class KeyComboCommand(Command):
         :param device       virtual device to emit event on
         """
         if event.type == ecodes.EV_SYN:
-            device.write(event)
+            device.write_event(event)
         else:
             for keycode in self._keycodes:
                 device.write(ecodes.EV_KEY, keycode, event.value)

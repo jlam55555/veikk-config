@@ -1,4 +1,4 @@
-import subprocess
+from subprocess import Popen
 from typing import List
 from evdev import InputEvent, ecodes
 
@@ -15,10 +15,14 @@ class ProgramCommand(Command):
                  program: List[str],
                  run_in_terminal: bool = False,
                  trigger_type_map: CommandTriggerMap
-                 = CommandTriggerMap(CommandTrigger.KEYDOWN)):
+                 = CommandTriggerMap(CommandTrigger.KEYDOWN),
+                 **popen_options):
+        if run_in_terminal:
+            program = ['xterm', '-e', ' '.join(program)]
+
         self._program = program
-        self._run_in_terminal = run_in_terminal
         self._trigger_type_map = trigger_type_map
+        self._popen_options = popen_options
         super(ProgramCommand, self).__init__(CommandType.KEYCOMBO)
 
     def execute(self, event: InputEvent, _):
@@ -35,7 +39,4 @@ class ProgramCommand(Command):
                 not self._trigger_type_map[event.value]:
             return
 
-        if self._run_in_terminal:
-            subprocess.Popen(['xterm', '-e', ' '.join(self._program)])
-        else:
-            subprocess.Popen(self._program)
+        Popen(self._program, **self._popen_options)

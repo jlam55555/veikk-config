@@ -36,21 +36,11 @@ class VeikkDaemon:
         :param udev_device:
         :return:
         """
-
-        # simple mapping for testing
-        from evdev import ecodes
-        from veikk.command.program_command import ProgramCommand
-        mapping = {
-            ecodes.BTN_0: ProgramCommand(['echo', 'Hello, world!', ';', 'read'],
-                                         True)
-        }
-
         if UdevUtil.is_veikk_evdev_device(udev_device):
             # TODO: need to protect self._veikk_devices with a mutex
             self._veikk_devices[UdevUtil.event_path(udev_device)] = \
                 VeikkDevice(UdevUtil.to_evdev_device(udev_device),
-                            self._event_loop,
-                            mapping)
+                            self._event_loop)
 
     def _remove_veikk_device(self, udev_device: Device):
         """
