@@ -16,9 +16,18 @@ This includes two command-line scripts:
 ---
 
 ### Install
-TODO: actually create the PyPI package
+Install the package globally, so that the root user can access the scripts (necessary for running the daemon).
+
+TODO: notes about prerequisites...
+
 ```bash
-$ pip install veikk-config
+$ sudo python3 -m pip install --prefix=/usr/local veikk-config
+```
+(If you have a venv set up, make sure it is not active -- you want to be using the global Python environment.)
+
+##### Uninstall
+```bash
+$ sudo python3 -m pip uninstall veikk-config
 ```
 
 ---
@@ -47,14 +56,12 @@ To test the programs without `pip install`-ing them every time, you can use the 
 (venv) $ python 
 ```
 
-##### Install the package (development)
+##### Install the package (locally)
 The `veikk` and `veikkctl` packages will be installed using distutils. These will expose the [command line scripts](https://python-packaging.readthedocs.io/en/latest/command-line-scripts.html) of the same name.
-
-If you want to install the command line script globally, make sure that you are not in the venv.
 ```bash
-$ pip install .
-$ veikk         # run veikk config daemon
-$ veikkctl      # run veikk config interface
+(venv) $ pip install .
+(venv) $ veikk         # run veikk config daemon
+(venv) $ veikkctl      # run veikk config interface
 ```
 
 [v2-gui]: https://www.github.com/jlam55555/veikk-linux-driver-gui
