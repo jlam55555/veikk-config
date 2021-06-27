@@ -1,27 +1,56 @@
-from evdev import InputDevice, InputEvent
+from evdev import InputDevice, InputEvent, categorize
 from threading import Thread
 
+from veikk._veikk_device import _VeikkDevice
+from veikk.event_loop import EventLoop
 
-class VeikkDevice:
 
-    def __init__(self, device: InputDevice) -> None:
+class VeikkDevice(_VeikkDevice):
+
+    def __init__(self, device: InputDevice, event_loop: EventLoop) -> None:
         self._device: InputDevice = device
+
+        # get exclusive access to device (i.e., the events will not get used
+        # by the display server)
+        self._device.grab()
+
+        self._already_destroyed = False
 
         if __debug__:
             print(f'New VeikkDevice: {self._device.name}')
 
-        Thread(target=self._event_loop_thread).start()
+        self._event_loop = event_loop
+        self._event_loop.register_device(self)
 
-    def _event_loop_thread(self) -> None:
+    def handle_events(self) -> None:
+        """
+        Gets called when an event is emitted by the InputDevice.
+        :return:
+        """
         try:
-            for event in self._device.read_loop():
-                self._handle_event(event)
+            for event in self._device.read():
+                print(categorize(event))
+            print('event done')
         except OSError:
-            self._cleanup()
+            self.cleanup()
 
-    def _handle_event(self, event: InputEvent) -> None:
-        print(event)
+    def cleanup(self):
+        """
+        Perform any cleanup actions. (Currently does nothing.)
+        :return:
+        """
+        if self._already_destroyed:
+            return
 
-    def _cleanup(self):
+        self._event_loop.unregister_device(self)
+        self._already_destroyed = True
+
         if __debug__:
             print(f'Disconnected VeikkDevice: {self._device.name}')
+
+    def fileno(self) -> int:
+        """
+        Implement the HasFileno interface
+        :return:    fd of the associated InputDevice
+        """
+        return self._device.fileno()
