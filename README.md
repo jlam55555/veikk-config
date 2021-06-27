@@ -18,6 +18,8 @@ This includes two command-line scripts:
 ### Install
 Install the package globally, so that the root user can access the scripts (necessary for running the daemon).
 
+Type hints are used, so this requires at least Python 3.5.
+
 TODO: notes about prerequisites...
 
 ```bash
