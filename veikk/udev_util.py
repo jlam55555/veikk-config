@@ -35,19 +35,29 @@ class UdevUtil:
     @staticmethod
     def to_evdev_device(device: Device) -> InputDevice:
         """
-        Converts a pyudev Device object to a evdev InputDevice object, if
-        applicable. Since udev handles more devices than evdev devices, this
-        will return None for other device types.
-        :param device:  pyudev Device object
-        :return:        evdev InputDevice object or None
+        Converts a pyudev Device object to a evdev InputDevice object
+        :param device:  pyudev Device object for a VEIKK device
+        :return:        evdev InputDevice object
         """
-        return InputDevice(UdevUtil.event_path(device)) \
-            if UdevUtil.is_udev_device(device) else None
+        return InputDevice(UdevUtil.event_path(device))
 
     @staticmethod
-    def is_udev_device(device: Device) -> bool:
-        return device.sys_name.startswith('event')
+    def is_veikk_evdev_device(device: Device) -> bool:
+        """
+        Since pyudev handles more than just evdev devices (there are the
+        underlying devices as well) and not just VEIKK devices, we have to
+        filter only the devices we want.
+        :param device:  Device object
+        :return:        whether the device is a VEIKK evdev device
+        """
+        return device.sys_name.startswith('event') and \
+               device.properties['ID_VENDOR'] == 'VEIKK.INC'
 
     @staticmethod
     def event_path(device: Device) -> str:
+        """
+        Get the path needed to construct an evdev InputDevice.
+        :param device:  Device object
+        :return:        device event device path
+        """
         return f'/dev/input/{device.sys_name}'

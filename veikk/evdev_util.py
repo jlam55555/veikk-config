@@ -13,11 +13,11 @@ class EvdevUtil:
         Gets the list of VEIKK devices at boot
         :return:    list of current VEIKK devices
         """
-        return list(filter(EvdevUtil._is_veikk_device,
+        return list(filter(EvdevUtil.is_veikk_device,
                            [InputDevice(path) for path in list_devices()]))
 
     @staticmethod
-    def _is_veikk_device(device: InputDevice) -> bool:
+    def is_veikk_device(device: InputDevice) -> bool:
         """
         Determines whether a evdev device is a VEIKK device
         :param device:  evdev device

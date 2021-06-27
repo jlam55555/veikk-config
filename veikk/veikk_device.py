@@ -20,7 +20,7 @@ class VeikkDevice:
             self._cleanup()
 
     def _handle_event(self, event: InputEvent) -> None:
-        pass
+        print(event)
 
     def _cleanup(self):
         if __debug__:

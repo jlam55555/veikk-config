@@ -26,14 +26,24 @@ class VeikkDaemon:
             self._veikk_devices[device.path] = VeikkDevice(device)
 
     def _add_veikk_device(self, udev_device: Device):
-        new_device = UdevUtil.to_evdev_device(udev_device)
-
-        if new_device is not None:
+        """
+        Handler for udev add device event. If the device is an evdev device,
+        add it to the dict of devices
+        :param udev_device:
+        :return:
+        """
+        if UdevUtil.is_veikk_evdev_device(udev_device):
             # TODO: need to protect self._veikk_devices with a mutex
             self._veikk_devices[UdevUtil.event_path(udev_device)] =\
-                VeikkDevice(new_device)
+                VeikkDevice(UdevUtil.to_evdev_device(udev_device))
 
     def _remove_veikk_device(self, udev_device: Device):
-        if UdevUtil.is_udev_device(udev_device):
+        """
+        Handler for udev remove device event. If the device is an evdev device,
+        remove it from the dict of devices.
+        :param udev_device:
+        :return:
+        """
+        if UdevUtil.is_veikk_evdev_device(udev_device):
             # TODO: same as above
             del self._veikk_devices[UdevUtil.event_path(udev_device)]
