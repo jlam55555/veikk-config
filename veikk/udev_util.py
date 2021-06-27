@@ -51,7 +51,8 @@ class UdevUtil:
         :return:        whether the device is a VEIKK evdev device
         """
         return device.sys_name.startswith('event') and \
-               device.properties['ID_VENDOR'] == 'VEIKK.INC'
+            'ID_VENDOR' in device.properties and \
+            device.properties['ID_VENDOR'] == 'VEIKK.INC'
 
     @staticmethod
     def event_path(device: Device) -> str:

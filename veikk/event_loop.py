@@ -13,8 +13,13 @@ class EventLoop:
         self._selector.register(device, EVENT_READ)
 
     def unregister_device(self, device: _VeikkDevice):
-        print(f'Attempting to unregister {device.fileno()}')
-        self._selector.unregister(device)
+        # in some rare cases, the device may not get registered (e.g., inserting
+        # and removing the device quickly, so wrap this in a try/except block
+        try:
+            self._selector.unregister(device)
+        except KeyError:
+            if __debug__:
+                print(f'Keyerror on unregistering {device.fileno()}')
 
     def _event_loop_thread(self):
         # TODO: self._selector should also probably be protected with an mutex
