@@ -1,5 +1,4 @@
-from evdev import InputDevice, InputEvent, categorize
-from threading import Thread
+from evdev import InputDevice, categorize
 
 from veikk._veikk_device import _VeikkDevice
 from veikk.event_loop import EventLoop
@@ -14,6 +13,8 @@ class VeikkDevice(_VeikkDevice):
         # by the display server)
         self._device.grab()
 
+        # the destroy method may be called from the udev event or when
+        # the InputDevice::read() fails, whichever comes sooner
         self._already_destroyed = False
 
         if __debug__:
@@ -34,19 +35,21 @@ class VeikkDevice(_VeikkDevice):
         except OSError:
             self.cleanup()
 
-    def cleanup(self):
+    def cleanup(self) -> bool:
         """
-        Perform any cleanup actions. (Currently does nothing.)
-        :return:
+        Perform any cleanup actions.
+        :return:    True if this device has not been cleaned up before
         """
         if self._already_destroyed:
-            return
+            return False
 
         self._event_loop.unregister_device(self)
         self._already_destroyed = True
 
         if __debug__:
             print(f'Disconnected VeikkDevice: {self._device.name}')
+
+        return True
 
     def fileno(self) -> int:
         """

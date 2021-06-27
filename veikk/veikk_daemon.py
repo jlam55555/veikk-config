@@ -23,8 +23,8 @@ class VeikkDaemon:
                                    self._remove_veikk_device)
 
         # main thread sleeps forever sleep forever -- dbus loop?
-        while True:
-            input()
+        # while True:
+        #     input()
 
     def _add_veikk_device(self, udev_device: Device):
         """
@@ -48,5 +48,5 @@ class VeikkDaemon:
         """
         if UdevUtil.is_veikk_evdev_device(udev_device):
             # TODO: same as above
-            self._veikk_devices[UdevUtil.event_path(udev_device)].cleanup()
-            del self._veikk_devices[UdevUtil.event_path(udev_device)]
+            if self._veikk_devices[UdevUtil.event_path(udev_device)].cleanup():
+                del self._veikk_devices[UdevUtil.event_path(udev_device)]

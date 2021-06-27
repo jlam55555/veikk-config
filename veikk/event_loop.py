@@ -22,6 +22,4 @@ class EventLoop:
             for key, _ in self._selector.select():
                 # kill the typing hint in the following line
                 assert isinstance(key.fileobj, _VeikkDevice)
-
-                device = key.fileobj
-                device.handle_events()
+                key.fileobj.handle_events()
