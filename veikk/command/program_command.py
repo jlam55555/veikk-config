@@ -32,7 +32,7 @@ class ProgramCommand(Command):
         there are too many options for launching other shells and xterm
         is standard.
         :param event:   original event
-        :param _:       uinput device -- unused
+        :param _:       uinput devices -- unused
         :return:
         """
         if event.type == ecodes.EV_SYN or \

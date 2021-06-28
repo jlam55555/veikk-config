@@ -19,6 +19,8 @@ class VeikkDevice(_VeikkDevice):
                  event_loop: EventLoop,
                  command_map: Mapping[KeyCode, Command] = None) -> None:
 
+        # TODO: remove; for testing
+        # TODO: also don't hardcode in uinput details
         # simple mapping for testing
         from evdev import ecodes
         from veikk.command.program_command import ProgramCommand
@@ -50,6 +52,8 @@ class VeikkDevice(_VeikkDevice):
             #   should be able to get current user from systemd unit specifiers
             ecodes.BTN_5: ProgramCommand(['google-chrome']),
 
+            ecodes.BTN_6: KeyComboCommand([ecodes.KEY_VOLUMEUP]),
+
             ecodes.BTN_WEST: KeyComboCommand([ecodes.KEY_LEFTBRACE]),
             ecodes.BTN_EAST: KeyComboCommand([ecodes.KEY_RIGHTBRACE]),
             ecodes.BTN_NORTH: KeyComboCommand([ecodes.KEY_EQUAL]),
@@ -57,35 +61,6 @@ class VeikkDevice(_VeikkDevice):
             ecodes.BTN_TOOL_DOUBLETAP: KeyComboCommand([ecodes.KEY_LEFTCTRL,
                                                         ecodes.KEY_0])
         }
-        print(device.name)
-        if device.name.endswith('Pen'):
-            capabilities = {
-                ecodes.EV_KEY: [ecodes.BTN_TOUCH,
-                                ecodes.BTN_STYLUS,
-                                ecodes.BTN_STYLUS2],
-                ecodes.EV_ABS: [
-                    (ecodes.ABS_X, AbsInfo(value=0, min=0, max=50800,
-                                           fuzz=0, flat=0, resolution=100)),
-                    (ecodes.ABS_Y, AbsInfo(value=0, min=0, max=30480,
-                                           fuzz=0, flat=0, resolution=100)),
-                    (ecodes.ABS_PRESSURE, AbsInfo(value=0, min=0, max=8192,
-                                                  fuzz=0, flat=0,
-                                                  resolution=100))
-                ]
-            }
-            input_props = [ecodes.INPUT_PROP_POINTER]
-        else:
-            capabilities = {
-                ecodes.EV_KEY: [ecodes.KEY_LEFTCTRL,
-                                ecodes.KEY_RIGHTSHIFT,
-                                ecodes.KEY_E,
-                                ecodes.KEY_LEFTBRACE,
-                                ecodes.KEY_RIGHTBRACE,
-                                ecodes.KEY_EQUAL,
-                                ecodes.KEY_MINUS,
-                                ecodes.KEY_0]
-            }
-            input_props = None
 
         if command_map is None:
             command_map = {}
@@ -93,11 +68,11 @@ class VeikkDevice(_VeikkDevice):
         self._device: InputDevice = device
         self._command_map = command_map
 
-        # create a uinput device that has the properties of the original,
-        # except the events
-        self._uinput_device = UInput(events=capabilities,
-                                     name=f'Mapped {self._device.name}',
-                                     input_props=input_props)
+        # remove the word " Bundled" from the device name
+        self._device_name = device.name[:-8]
+
+        self._uinput_devices = (self._setup_uinput_pen(),
+                                self._setup_uinput_keyboard())
 
         # get exclusive access to device (i.e., the events will not get used
         # by the display server)
@@ -108,10 +83,55 @@ class VeikkDevice(_VeikkDevice):
         self._already_destroyed = False
 
         if __debug__:
-            print(f'New VeikkDevice: {self._device.name}')
+            print(f'New VeikkDevice: {self._device_name}')
 
         self._event_loop = event_loop
         self._event_loop.register_device(self)
+
+    def _setup_uinput_pen(self) -> UInput:
+        """
+        Creates uinput device to dispatch pen (ABS_*, BTN_*) events on.
+        :return:
+        """
+        capabilities = {
+            ecodes.EV_KEY: [ecodes.BTN_TOUCH,
+                            ecodes.BTN_STYLUS,
+                            ecodes.BTN_STYLUS2],
+            ecodes.EV_ABS: [
+                (ecodes.ABS_X, AbsInfo(value=0, min=0, max=50800,
+                                       fuzz=0, flat=0, resolution=100)),
+                (ecodes.ABS_Y, AbsInfo(value=0, min=0, max=30480,
+                                       fuzz=0, flat=0, resolution=100)),
+                (ecodes.ABS_PRESSURE, AbsInfo(value=0, min=0, max=8192,
+                                              fuzz=0, flat=0,
+                                              resolution=100))
+            ]
+        }
+        input_props = [ecodes.INPUT_PROP_POINTER]
+        return UInput(events=capabilities,
+                      name=f'{self._device_name} Pen',
+                      input_props=input_props)
+
+    def _setup_uinput_keyboard(self) -> UInput:
+        """
+        Creates uinput device to dispatch keyboard events on
+        :return:
+        """
+        capabilities = {
+            ecodes.EV_KEY: [ecodes.KEY_LEFTCTRL,
+                            ecodes.KEY_RIGHTSHIFT,
+                            ecodes.KEY_E,
+                            ecodes.KEY_LEFTBRACE,
+                            ecodes.KEY_RIGHTBRACE,
+                            ecodes.KEY_EQUAL,
+                            ecodes.KEY_MINUS,
+                            ecodes.KEY_0,
+                            ecodes.KEY_VOLUMEUP]
+        }
+        input_props = None
+        return UInput(events=capabilities,
+                      name=f'{self._device_name} Keyboard',
+                      input_props=input_props)
 
     def handle_events(self) -> None:
         """
@@ -123,10 +143,11 @@ class VeikkDevice(_VeikkDevice):
                 # automatically send all sync events, regardless of mapping;
                 # this is so to simplify the mappings
                 if event.type == ecodes.EV_SYN:
-                    self._uinput_device.write_event(event)
+                    self._uinput_devices[0].write_event(event)
+                    self._uinput_devices[1].write_event(event)
                 else:
                     self._command_map.get(event.code, noop) \
-                        .execute(event, self._uinput_device)
+                        .execute(event, self._uinput_devices)
         except OSError:
             # device removed -- clean up normally
             self.cleanup()
@@ -141,7 +162,8 @@ class VeikkDevice(_VeikkDevice):
 
         try:
             self._event_loop.unregister_device(self)
-            self._uinput_device.close()
+            self._uinput_devices[0].close()
+            self._uinput_devices[1].close()
         except OSError as err:
             # sometimes occurs if device was not registered with the event loop
             print(f'Ignoring error: {err.strerror}')
@@ -149,7 +171,7 @@ class VeikkDevice(_VeikkDevice):
         self._already_destroyed = True
 
         if __debug__:
-            print(f'Disconnected VeikkDevice: {self._device.name}')
+            print(f'Disconnected VeikkDevice: {self._device_name}')
 
         return True
 

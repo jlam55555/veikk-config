@@ -29,10 +29,12 @@ class PenTransformCommand(Command):
         self._pressure_transform = pressure_transform
         super(PenTransformCommand, self).__init__(CommandType.PEN_TRANSFORM)
 
-    def execute(self, event: InputEvent, device: UInput) -> None:
+    def execute(self,
+                event: InputEvent,
+                devices: Tuple[UInput, UInput]) -> None:
         if event.code == ecodes.ABS_PRESSURE:
-            device.write(event.type, event.code, event.value)
+            devices[0].write(event.type, event.code, event.value)
         elif event.code == ecodes.ABS_X or event.code == ecodes.ABS_Y:
-            device.write_event(event)
+            devices[0].write_event(event)
 
         # maybe tilt support in the future?

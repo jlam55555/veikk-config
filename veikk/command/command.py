@@ -1,4 +1,6 @@
 from enum import Enum
+from typing import Tuple
+
 from evdev import InputEvent, UInput
 
 KeyCode = int
@@ -48,10 +50,13 @@ class Command:
     def __init__(self, command_type: CommandType):
         self._type = command_type
 
-    def execute(self, event: InputEvent, device: UInput) -> None:
+    def execute(self,
+                event: InputEvent,
+                devices: Tuple[UInput, UInput]) -> None:
         """
         Dispatch command when the associated event is emitted from the driver.
         :param event:       the original event from the driver
-        :param device:      the virtual device to emit events on
+        :param devices:     the pen and keyboard virtual devices to dispatch
+                            events to
         """
         ...
