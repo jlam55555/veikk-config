@@ -23,7 +23,7 @@ class ProgramCommand(Command):
         self._program = program
         self._trigger_type_map = trigger_type_map
         self._popen_options = popen_options
-        super(ProgramCommand, self).__init__(CommandType.KEYCOMBO)
+        super(ProgramCommand, self).__init__(CommandType.PROGRAM)
 
     def execute(self, event: InputEvent, _):
         """

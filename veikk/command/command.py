@@ -6,8 +6,9 @@ KeyCode = int
 
 class CommandType(Enum):
     NOOP = 0
-    KEYCOMBO = 1
-    METHOD = 2
+    KEY_COMBO = 1
+    PROGRAM = 2
+    PEN_TRANSFORM = 3
 
 
 class CommandTrigger(Enum):

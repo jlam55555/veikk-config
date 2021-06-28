@@ -10,7 +10,7 @@ class KeyComboCommand(Command):
     """
     def __init__(self, keycodes: List[KeyCode]) -> None:
         self._keycodes = keycodes
-        super(KeyComboCommand, self).__init__(CommandType.KEYCOMBO)
+        super(KeyComboCommand, self).__init__(CommandType.KEY_COMBO)
 
     def execute(self, event: InputEvent, device: UInput) -> None:
         """
@@ -19,8 +19,5 @@ class KeyComboCommand(Command):
                             keydown or keyup (event.value)
         :param device       virtual device to emit event on
         """
-        if event.type == ecodes.EV_SYN:
-            device.write_event(event)
-        else:
-            for keycode in self._keycodes:
-                device.write(ecodes.EV_KEY, keycode, event.value)
+        for keycode in self._keycodes:
+            device.write(ecodes.EV_KEY, keycode, event.value)
