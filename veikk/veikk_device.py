@@ -6,6 +6,7 @@ from evdev import ecodes
 from veikk._veikk_device import _VeikkDevice
 from veikk.command.command import Command, KeyCode
 from veikk.command.noop_command import NoopCommand
+from veikk.evdev_util import EvdevUtil
 from veikk.event_loop import EventLoop
 
 # no reason to have to create this multiple times, reuse this instance
@@ -20,7 +21,6 @@ class VeikkDevice(_VeikkDevice):
                  command_map: Mapping[KeyCode, Command] = None) -> None:
 
         # TODO: remove; for testing
-        # TODO: also don't hardcode in uinput details
         # simple mapping for testing
         from evdev import ecodes
         from veikk.command.program_command import ProgramCommand
@@ -53,6 +53,7 @@ class VeikkDevice(_VeikkDevice):
             ecodes.BTN_5: ProgramCommand(['google-chrome']),
 
             ecodes.BTN_6: KeyComboCommand([ecodes.KEY_VOLUMEUP]),
+            ecodes.BTN_7: KeyComboCommand([ecodes.KEY_BACKSPACE]),
 
             ecodes.BTN_WEST: KeyComboCommand([ecodes.KEY_LEFTBRACE]),
             ecodes.BTN_EAST: KeyComboCommand([ecodes.KEY_RIGHTBRACE]),
@@ -91,12 +92,13 @@ class VeikkDevice(_VeikkDevice):
     def _setup_uinput_pen(self) -> UInput:
         """
         Creates uinput device to dispatch pen (ABS_*, BTN_*) events on.
+
+        TODO: get capabilities from the device
+
         :return:
         """
         capabilities = {
-            ecodes.EV_KEY: [ecodes.BTN_TOUCH,
-                            ecodes.BTN_STYLUS,
-                            ecodes.BTN_STYLUS2],
+            ecodes.EV_KEY: EvdevUtil.get_pen_evkey_events(),
             ecodes.EV_ABS: [
                 (ecodes.ABS_X, AbsInfo(value=0, min=0, max=50800,
                                        fuzz=0, flat=0, resolution=100)),
@@ -114,19 +116,16 @@ class VeikkDevice(_VeikkDevice):
 
     def _setup_uinput_keyboard(self) -> UInput:
         """
-        Creates uinput device to dispatch keyboard events on
-        :return:
+        Creates uinput device to dispatch keyboard events on. Allows any
+        keyboard event, except those that only work when dispatched on a pen
+        device (see EvdevUtil::is_pen_event).
+
+        :return:    created uinput device
         """
         capabilities = {
-            ecodes.EV_KEY: [ecodes.KEY_LEFTCTRL,
-                            ecodes.KEY_RIGHTSHIFT,
-                            ecodes.KEY_E,
-                            ecodes.KEY_LEFTBRACE,
-                            ecodes.KEY_RIGHTBRACE,
-                            ecodes.KEY_EQUAL,
-                            ecodes.KEY_MINUS,
-                            ecodes.KEY_0,
-                            ecodes.KEY_VOLUMEUP]
+            ecodes.EV_KEY: [code
+                            for code, _ in ecodes.bytype[ecodes.EV_KEY].items()
+                            if not EvdevUtil.is_pen_event(code)]
         }
         input_props = None
         return UInput(events=capabilities,
@@ -135,7 +134,9 @@ class VeikkDevice(_VeikkDevice):
 
     def handle_events(self) -> None:
         """
-        Gets called when an event is emitted by the InputDevice.
+        Gets called when an event is emitted by the InputDevice. Is set up with
+        pen/mouse and button capabilities.
+
         :return:
         """
         try:
