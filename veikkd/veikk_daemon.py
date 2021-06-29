@@ -1,6 +1,9 @@
 from typing import Dict
+
+from evdev import InputDevice
 from pyudev import Device
 
+from veikkd.command.command import CommandMap
 from veikkd.config_change_notifier import ConfigChangeNotifier
 from veikkd.evdev_util import EvdevUtil
 from veikkd.event_loop import EventLoop
@@ -15,25 +18,29 @@ class VeikkDaemon:
     will ensue.
     """
 
-    def __init__(self):
+    def __init__(self, default_command_map: CommandMap = None):
+        if default_command_map is None:
+            default_command_map = {}
+        self._command_map = default_command_map
+
         # event loop listens in the background forever
         self._event_loop = EventLoop()
 
-        # maps a path to a device
-        # initialize with initial set of devices
-        self._veikk_devices: Dict[str, VeikkDevice] = {
-            device.path: VeikkDevice(device, self._event_loop)
-            for device in EvdevUtil.get_initial_devices()
-        }
+        # initialize with initial set of devices; maps event path to device
+        self._veikk_devices: Dict[str, VeikkDevice] = {}
+        for device in EvdevUtil.get_initial_devices():
+            self._add_veikk_device(device)
 
         # start listening for device add/remove events
-        UdevUtil.init_udev_monitor(self._add_veikk_device,
-                                   self._remove_veikk_device)
+        UdevUtil.init_udev_monitor(self._add_udev_veikk_device,
+                                   self._remove_udev_veikk_device)
 
+        # listen to changes
+        # TODO: change this to use dbus?
         ConfigChangeNotifier('/tmp/veikkd')\
             .listen_thread()
 
-    def _add_veikk_device(self, udev_device: Device):
+    def _add_udev_veikk_device(self, udev_device: Device):
         """
         Handler for udev add device event. If the device is an evdev device,
         add it to the dict of devices
@@ -42,11 +49,18 @@ class VeikkDaemon:
         """
         if UdevUtil.is_veikk_evdev_device(udev_device):
             # TODO: need to protect self._veikk_devices with a mutex
-            self._veikk_devices[UdevUtil.event_path(udev_device)] = \
-                VeikkDevice(UdevUtil.to_evdev_device(udev_device),
-                            self._event_loop)
+            self._add_veikk_device(UdevUtil.to_evdev_device(udev_device))
 
-    def _remove_veikk_device(self, udev_device: Device):
+    def _add_veikk_device(self, device: InputDevice):
+        """
+        Add veikk device from evdev device
+        :param device:
+        :return:
+        """
+        self._veikk_devices[device.path] \
+            = VeikkDevice(device, self._event_loop, self._command_map)
+
+    def _remove_udev_veikk_device(self, udev_device: Device):
         """
         Handler for udev remove device event. If the device is an evdev device,
         remove it from the dict of devices.

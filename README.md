@@ -63,7 +63,7 @@ The `veikk` and `veikkctl` packages will be installed using distutils. These wil
 ```bash
 (venv) $ pip install .
 (venv) $ veikkd         # run veikkd config daemon
-(venv) $ veikkctl      # run veikkd config interface
+(venv) $ veikkctl       # run veikk config interface
 ```
 
 [v2-gui]: https://www.github.com/jlam55555/veikk-linux-driver-gui

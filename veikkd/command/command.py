@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Tuple
+from typing import Tuple, Mapping
 
 from evdev import InputEvent, UInput
 
@@ -60,3 +60,6 @@ class Command:
                             events to
         """
         ...
+
+
+CommandMap = Mapping[KeyCode, Command]

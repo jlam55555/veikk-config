@@ -1,8 +1,8 @@
 from veikkd.veikk_daemon import VeikkDaemon
 
 
-def main():
+def main(**kwargs):
     """
     Entry point if running as a console script
     """
-    VeikkDaemon()
+    VeikkDaemon(**kwargs)

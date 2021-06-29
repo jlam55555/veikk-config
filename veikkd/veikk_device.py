@@ -4,7 +4,7 @@ from evdev import InputDevice, UInput, AbsInfo
 from evdev import ecodes
 
 from veikkd._veikk_device import _VeikkDevice
-from veikkd.command.command import Command, KeyCode
+from veikkd.command.command import CommandMap
 from veikkd.command.noop_command import NoopCommand
 from veikkd.evdev_util import EvdevUtil
 from veikkd.event_loop import EventLoop
@@ -18,50 +18,7 @@ class VeikkDevice(_VeikkDevice):
     def __init__(self,
                  device: InputDevice,
                  event_loop: EventLoop,
-                 command_map: Mapping[KeyCode, Command] = None) -> None:
-
-        # TODO: remove; for testing
-        # simple mapping for testing
-        from evdev import ecodes
-        from veikkd.command.program_command import ProgramCommand
-        from veikkd.command.keycombo_command import KeyComboCommand
-        from veikkd.command.command import CommandTriggerMap, CommandTrigger
-        from veikkd.command.pentransform_command import PenTransformCommand
-        pen_command = PenTransformCommand()
-        command_map = {
-            ecodes.ABS_X: pen_command,
-            ecodes.ABS_Y: pen_command,
-            ecodes.ABS_PRESSURE: pen_command,
-            ecodes.BTN_TOUCH: KeyComboCommand([ecodes.BTN_TOUCH]),
-            ecodes.BTN_STYLUS: KeyComboCommand([ecodes.BTN_STYLUS]),
-            ecodes.BTN_STYLUS2: KeyComboCommand([ecodes.BTN_STYLUS2]),
-            ecodes.BTN_0: ProgramCommand(['echo', 'Hello, world!', ';', 'read'],
-                                         True),
-            ecodes.BTN_1: ProgramCommand(['htop'], True,
-                                         start_new_session=True),
-            ecodes.BTN_2: KeyComboCommand([ecodes.KEY_LEFTCTRL,
-                                           ecodes.KEY_RIGHTSHIFT,
-                                           ecodes.KEY_E]),
-            ecodes.BTN_3: ProgramCommand(['krita'],
-                                         run_as_user='jon'),
-            ecodes.BTN_4: ProgramCommand([
-                'xvkbd', '-no-jump-pointer', '-text', 'Hello, world'],
-                trigger_type_map=CommandTriggerMap(CommandTrigger.KEYUP)),
-
-            # have to manually specify a user for this to work.
-            ecodes.BTN_5: ProgramCommand(['google-chrome'],
-                                         run_as_user='jon'),
-
-            ecodes.BTN_6: KeyComboCommand([ecodes.KEY_VOLUMEUP]),
-            ecodes.BTN_7: KeyComboCommand([ecodes.KEY_BACKSPACE]),
-
-            ecodes.BTN_WEST: KeyComboCommand([ecodes.KEY_LEFTBRACE]),
-            ecodes.BTN_EAST: KeyComboCommand([ecodes.KEY_RIGHTBRACE]),
-            ecodes.BTN_NORTH: KeyComboCommand([ecodes.KEY_EQUAL]),
-            ecodes.BTN_SOUTH: KeyComboCommand([ecodes.KEY_MINUS]),
-            ecodes.BTN_TOOL_DOUBLETAP: KeyComboCommand([ecodes.KEY_LEFTCTRL,
-                                                        ecodes.KEY_0])
-        }
+                 command_map: CommandMap = None) -> None:
 
         if command_map is None:
             command_map = {}

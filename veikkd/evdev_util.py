@@ -51,5 +51,6 @@ class EvdevUtil:
         return list(EvdevUtil._known_pen_evkey_events)
 
     _known_pen_evkey_events = {
-        ecodes.BTN_STYLUS, ecodes.BTN_STYLUS2, ecodes.BTN_STYLUS3
+        ecodes.BTN_STYLUS, ecodes.BTN_STYLUS2, ecodes.BTN_STYLUS3,
+        ecodes.BTN_LEFT, ecodes.BTN_RIGHT
     }
