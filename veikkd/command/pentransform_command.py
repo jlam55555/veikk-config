@@ -1,7 +1,7 @@
 from typing import Tuple
 from evdev import UInput, ecodes, InputEvent
 
-from veikk.command.command import Command, CommandType
+from veikkd.command.command import Command, CommandType
 
 AffineTransform2D = Tuple[float, float, float,
                           float, float, float,

@@ -1,8 +1,8 @@
 from typing import List, Tuple
 from evdev import UInput, ecodes, InputEvent
 
-from veikk.command.command import Command, CommandType, KeyCode
-from veikk.evdev_util import EvdevUtil
+from veikkd.command.command import Command, CommandType, KeyCode
+from veikkd.evdev_util import EvdevUtil
 
 
 class KeyComboCommand(Command):

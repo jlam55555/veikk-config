@@ -1,3 +1,3 @@
-from veikk import main
+from veikkd import main
 
 main()

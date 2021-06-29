@@ -1,15 +1,16 @@
 from typing import Dict
 from pyudev import Device
 
-from veikk.evdev_util import EvdevUtil
-from veikk.event_loop import EventLoop
-from veikk.udev_util import UdevUtil
-from veikk.veikk_device import VeikkDevice
+from veikkd.config_change_notifier import ConfigChangeNotifier
+from veikkd.evdev_util import EvdevUtil
+from veikkd.event_loop import EventLoop
+from veikkd.udev_util import UdevUtil
+from veikkd.veikk_device import VeikkDevice
 
 
 class VeikkDaemon:
     """
-    Entry point for veikk command. This is a singleton daemon and there should
+    Entry point for veikkd command. This is a singleton daemon and there should
     not be more than one instance of this created, or else unknown chaos (UB)
     will ensue.
     """
@@ -28,6 +29,9 @@ class VeikkDaemon:
         # start listening for device add/remove events
         UdevUtil.init_udev_monitor(self._add_veikk_device,
                                    self._remove_veikk_device)
+
+        ConfigChangeNotifier('/tmp/veikkd')\
+            .listen_thread()
 
     def _add_veikk_device(self, udev_device: Device):
         """

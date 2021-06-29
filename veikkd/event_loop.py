@@ -1,7 +1,7 @@
 from selectors import DefaultSelector, EVENT_READ
 from threading import Thread
 
-from veikk._veikk_device import _VeikkDevice
+from veikkd._veikk_device import _VeikkDevice
 
 
 class EventLoop:

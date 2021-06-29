@@ -3,11 +3,11 @@ from typing import Mapping
 from evdev import InputDevice, UInput, AbsInfo
 from evdev import ecodes
 
-from veikk._veikk_device import _VeikkDevice
-from veikk.command.command import Command, KeyCode
-from veikk.command.noop_command import NoopCommand
-from veikk.evdev_util import EvdevUtil
-from veikk.event_loop import EventLoop
+from veikkd._veikk_device import _VeikkDevice
+from veikkd.command.command import Command, KeyCode
+from veikkd.command.noop_command import NoopCommand
+from veikkd.evdev_util import EvdevUtil
+from veikkd.event_loop import EventLoop
 
 # no reason to have to create this multiple times, reuse this instance
 noop = NoopCommand()
@@ -23,10 +23,10 @@ class VeikkDevice(_VeikkDevice):
         # TODO: remove; for testing
         # simple mapping for testing
         from evdev import ecodes
-        from veikk.command.program_command import ProgramCommand
-        from veikk.command.keycombo_command import KeyComboCommand
-        from veikk.command.command import CommandTriggerMap, CommandTrigger
-        from veikk.command.pentransform_command import PenTransformCommand
+        from veikkd.command.program_command import ProgramCommand
+        from veikkd.command.keycombo_command import KeyComboCommand
+        from veikkd.command.command import CommandTriggerMap, CommandTrigger
+        from veikkd.command.pentransform_command import PenTransformCommand
         pen_command = PenTransformCommand()
         command_map = {
             ecodes.ABS_X: pen_command,
@@ -42,15 +42,15 @@ class VeikkDevice(_VeikkDevice):
             ecodes.BTN_2: KeyComboCommand([ecodes.KEY_LEFTCTRL,
                                            ecodes.KEY_RIGHTSHIFT,
                                            ecodes.KEY_E]),
-            ecodes.BTN_3: ProgramCommand(['krita']),
+            ecodes.BTN_3: ProgramCommand(['krita'],
+                                         run_as_user='jon'),
             ecodes.BTN_4: ProgramCommand([
                 'xvkbd', '-no-jump-pointer', '-text', 'Hello, world'],
                 trigger_type_map=CommandTriggerMap(CommandTrigger.KEYUP)),
 
-            # TODO: this fails because Google Chrome doesn't like to be run
-            #   as root; scripts should not be run as root in general;
-            #   should be able to get current user from systemd unit specifiers
-            ecodes.BTN_5: ProgramCommand(['google-chrome']),
+            # have to manually specify a user for this to work.
+            ecodes.BTN_5: ProgramCommand(['google-chrome'],
+                                         run_as_user='jon'),
 
             ecodes.BTN_6: KeyComboCommand([ecodes.KEY_VOLUMEUP]),
             ecodes.BTN_7: KeyComboCommand([ecodes.KEY_BACKSPACE]),

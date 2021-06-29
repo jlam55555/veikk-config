@@ -1,4 +1,4 @@
-from veikk.veikk_daemon import VeikkDaemon
+from veikkd.veikk_daemon import VeikkDaemon
 
 
 def main():

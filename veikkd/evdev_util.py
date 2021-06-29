@@ -1,7 +1,7 @@
 from evdev import InputDevice, list_devices, ecodes
 from typing import List
 
-from veikk.command.command import KeyCode
+from veikkd.command.command import KeyCode
 
 
 class EvdevUtil:

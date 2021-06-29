@@ -1,4 +1,4 @@
-from veikk.command.command import CommandType, Command
+from veikkd.command.command import CommandType, Command
 
 
 class NoopCommand(Command):

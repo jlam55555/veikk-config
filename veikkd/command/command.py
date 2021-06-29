@@ -31,7 +31,7 @@ class CommandTriggerMap(tuple):
 
     Sample usage: trigger on both keyup and keydown
 
-        from veikk.command.command import CommandTrigger as trigger
+        from veikkd.command.command import CommandTrigger as trigger
         ProgramTrigger(..., CommandTriggerMap(trigger.KEYDOWN, trigger.KEYUP))
     """
     def __new__(cls, *trigger_types: CommandTrigger):

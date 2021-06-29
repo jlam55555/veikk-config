@@ -1,0 +1,13 @@
+[Unit]
+Description=VEIKK configuration mapper
+After=dbus.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+Restart=always
+RestartSec=1
+ExecStart=/usr/bin/env veikkd
+
+[Install]
+WantedBy=multi-user.target

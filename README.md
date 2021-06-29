@@ -23,13 +23,13 @@ Type hints are used, so this requires at least Python 3.5.
 TODO: notes about prerequisites...
 
 ```bash
-$ sudo python3 -m pip install --prefix=/usr/local veikk-config
+$ sudo python3 -m pip install --prefix=/usr/local veikkd-config
 ```
 (If you have a venv set up, make sure it is not active -- you want to be using the global Python environment.)
 
 ##### Uninstall
 ```bash
-$ sudo python3 -m pip uninstall veikk-config
+$ sudo python3 -m pip uninstall veikkd-config
 ```
 
 ---
@@ -62,8 +62,8 @@ To test the programs without `pip install`-ing them every time, you can use the 
 The `veikk` and `veikkctl` packages will be installed using distutils. These will expose the [command line scripts](https://python-packaging.readthedocs.io/en/latest/command-line-scripts.html) of the same name.
 ```bash
 (venv) $ pip install .
-(venv) $ veikk         # run veikk config daemon
-(venv) $ veikkctl      # run veikk config interface
+(venv) $ veikkd         # run veikkd config daemon
+(venv) $ veikkctl      # run veikkd config interface
 ```
 
 [v2-gui]: https://www.github.com/jlam55555/veikk-linux-driver-gui
