@@ -28,6 +28,28 @@ class EvdevUtil:
         return device.name.startswith("VEIKK ")
 
     @staticmethod
+    def keycode_to_str(code: KeyCode) -> str:
+        """
+        Some keys may have multiple aliases representations, so we take
+        the first one (arbitrarily).
+        TODO: error handling
+        :param code:    keycode to find the string representation of
+        :return:
+        """
+        code = ecodes.keys[code]
+        return code[0] if isinstance(code, list) else code
+
+    @staticmethod
+    def str_to_keycode(code_str: str) -> KeyCode:
+        """
+        Convert string representation of key to keycode (number).
+        TODO: error handling
+        :param code_str:
+        :return:
+        """
+        return ecodes.ecodes[code_str]
+
+    @staticmethod
     def is_pen_event(event_code) -> bool:
         """
         Some button events (which fall under EV_KEY) will not work if sent

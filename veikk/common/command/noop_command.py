@@ -1,3 +1,5 @@
+from typing import Dict
+
 from .command import CommandType, Command
 
 
@@ -11,3 +13,6 @@ class NoopCommand(Command):
     def execute(self, _, __):
         if __debug__:
             print('event -> noop')
+
+    def _to_yaml_dict(self) -> Dict:
+        return {}

@@ -1,8 +1,11 @@
-from typing import Tuple
+from typing import Tuple, Dict
 from evdev import UInput, ecodes, InputEvent
 
 from .command import Command, CommandType
 
+# TODO: turn these into classes; may need utility functions to generate these
+#   from more human-friendly forms, and need to make them implement
+#   YamlSerializable as well, which is easier with a class
 AffineTransform2D = Tuple[float, float, float,
                           float, float, float,
                           float, float, float]
@@ -11,7 +14,8 @@ AffineTransform1D = Tuple[float, float]
 
 class PenTransformCommand(Command):
     """
-    Perform an affine transformation on the pen coordinates.
+    Perform an affine transformation on the pen coordinates. Is handled
+    separately from the other commands (which manage button actions).
     """
 
     def __init__(self,
@@ -38,3 +42,9 @@ class PenTransformCommand(Command):
             devices[0].write_event(event)
 
         # maybe tilt support in the future?
+
+    def _to_yaml_dict(self) -> Dict:
+        return {
+            'coord_transform': self._coord_transform,
+            'pressure_transform': self._pressure_transform
+        }

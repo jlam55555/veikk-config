@@ -3,12 +3,11 @@ from evdev import ecodes
 
 from ._veikk_device import _VeikkDevice
 from .event_loop import EventLoop
-from ..common.command.command import CommandMap
 from ..common.command.noop_command import NoopCommand
 from ..common.evdev_util import EvdevUtil
 
 # no reason to have to create this multiple times, reuse this instance
-noop = NoopCommand()
+from ..common.veikk_config import VeikkConfig
 
 
 class VeikkDevice(_VeikkDevice):
@@ -16,13 +15,10 @@ class VeikkDevice(_VeikkDevice):
     def __init__(self,
                  device: InputDevice,
                  event_loop: EventLoop,
-                 command_map: CommandMap = None) -> None:
-
-        if command_map is None:
-            command_map = {}
+                 config: VeikkConfig) -> None:
 
         self._device: InputDevice = device
-        self._command_map = command_map
+        self._config = config
 
         # remove the word " Bundled" from the device name
         self._device_name = device.name[:-8]
@@ -102,8 +98,7 @@ class VeikkDevice(_VeikkDevice):
                     self._uinput_devices[0].write_event(event)
                     self._uinput_devices[1].write_event(event)
                 else:
-                    self._command_map.get(event.code, noop) \
-                        .execute(event, self._uinput_devices)
+                    self._config.execute_event(event, self._uinput_devices)
         except OSError:
             # device removed -- clean up normally
             self.cleanup()

@@ -5,18 +5,16 @@ import veikk.daemon
 from evdev import ecodes
 from veikk.common.command.program_command import ProgramCommand
 from veikk.common.command.keycombo_command import KeyComboCommand
-from veikk.common.command.command import CommandTriggerMap, CommandTrigger, CommandMap
-from veikk.common.command.pentransform_command import PenTransformCommand
-pen_command = PenTransformCommand()
-command_map: CommandMap = {
-    ecodes.ABS_X: pen_command,
-    ecodes.ABS_Y: pen_command,
-    ecodes.ABS_PRESSURE: pen_command,
+from veikk.common.command.command import CommandTriggerMap, CommandTrigger
+from veikk.common.veikk_config import VeikkConfig
+
+config = VeikkConfig({
     ecodes.BTN_TOUCH: KeyComboCommand([ecodes.BTN_TOUCH]),
     ecodes.BTN_STYLUS: KeyComboCommand([ecodes.BTN_STYLUS]),
     ecodes.BTN_STYLUS2: KeyComboCommand([ecodes.BTN_STYLUS2]),
     ecodes.BTN_0: ProgramCommand(['echo', 'Hello, world!', ';', 'read'], True),
-    ecodes.BTN_1: ProgramCommand(['htop'], True, start_new_session=True),
+    ecodes.BTN_1: ProgramCommand(['htop'], True,
+                                 popen_options={'start_new_session':True}),
     ecodes.BTN_2: KeyComboCommand([ecodes.KEY_LEFTCTRL,
                                    ecodes.KEY_RIGHTSHIFT,
                                    ecodes.KEY_E]),
@@ -37,7 +35,15 @@ command_map: CommandMap = {
     ecodes.BTN_SOUTH: KeyComboCommand([ecodes.KEY_MINUS]),
     ecodes.BTN_TOOL_DOUBLETAP: KeyComboCommand([ecodes.KEY_LEFTCTRL,
                                                 ecodes.KEY_0])
-}
+})
 
-if __name__ == '__main__':
-    veikk.daemon.main(default_command_map=command_map)
+import yaml
+a = yaml.dump(config)
+b = yaml.load(a, Loader=yaml.Loader)
+c = yaml.dump(b)
+
+print(a, b)
+print(a == c)
+
+# if __name__ == '__main__':
+#     veikk.daemon.main(default_config=config)

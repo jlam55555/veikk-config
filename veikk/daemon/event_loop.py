@@ -5,6 +5,10 @@ from ._veikk_device import _VeikkDevice
 
 
 class EventLoop:
+    """
+    TODO: annotate this class
+    """
+
     def __init__(self):
         self._selector = DefaultSelector()
         Thread(target=self._event_loop_thread).start()

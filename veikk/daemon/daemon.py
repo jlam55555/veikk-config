@@ -5,22 +5,22 @@ from pyudev import Device
 from .config_change_notifier import ConfigChangeNotifier
 from .event_loop import EventLoop
 from .veikk_device import VeikkDevice
-from ..common.command.command import CommandMap
 from ..common.evdev_util import EvdevUtil
 from ..common.udev_util import UdevUtil
+from ..common.veikk_config import VeikkConfig
 
 
 class Daemon:
     """
-    Entry point for daemon command. This is a singleton daemon and there should
+    Entry point for veikkd command. This is a singleton daemon and there should
     not be more than one instance of this created, or else unknown chaos (UB)
     will ensue.
     """
 
-    def __init__(self, default_command_map: CommandMap = None):
-        if default_command_map is None:
-            default_command_map = {}
-        self._command_map = default_command_map
+    def __init__(self, default_config: VeikkConfig = None):
+        if default_config is None:
+            default_config = {}
+        self._config = default_config
 
         # event loop listens in the background forever
         self._event_loop = EventLoop()
@@ -56,7 +56,7 @@ class Daemon:
         :return:
         """
         self._veikk_devices[device.path] \
-            = VeikkDevice(device, self._event_loop, self._command_map)
+            = VeikkDevice(device, self._event_loop, self._config)
 
     def _remove_udev_veikk_device(self, udev_device: Device):
         """

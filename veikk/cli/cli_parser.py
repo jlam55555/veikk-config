@@ -4,13 +4,7 @@ from typing import Dict, Any
 import sys
 import os
 import yaml
-
-# try to use LibYAML if present, use python implementation as fallback
-# see: https://pyyaml.org/wiki/PyYAMLDocumentation
-try:
-    from yaml import CLoader as Loader, CDumper as Dumper
-except ImportError:
-    from yaml import Loader, Dumper
+from yaml import Loader
 
 from .command_handlers import CommandHandlers
 

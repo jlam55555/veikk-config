@@ -1,7 +1,9 @@
 from enum import Enum
-from typing import Tuple, Mapping
-
+from typing import Tuple
 from evdev import InputEvent, UInput
+from yaml import Dumper, Node, Loader
+
+from veikk.common.yaml_serializable import YamlSerializable
 
 KeyCode = int
 
@@ -24,7 +26,7 @@ class CommandTrigger(Enum):
     KEYPRESS = 2
 
 
-class CommandTriggerMap(tuple):
+class CommandTriggerMap(tuple, YamlSerializable):
     """
     Used to indicate which trigger type(s) trigger an action.
     Used in ProgramCommand.
@@ -39,16 +41,46 @@ class CommandTriggerMap(tuple):
                              (CommandTrigger.KEYUP in trigger_types,
                               CommandTrigger.KEYDOWN in trigger_types,
                               CommandTrigger.KEYPRESS in trigger_types))
+    
+    def __init__(self, *trigger_types: CommandTrigger):
+        super(CommandTriggerMap, self).__init__()
+
+    def _yaml_representer(self,
+                          dumper: Dumper,
+                          data: 'YamlSerializable') -> Node:
+        """
+        Serialize in the same form as the constructor.
+        :param dumper:
+        :param data:
+        :return:
+        """
+        return dumper.represent_sequence(f'!{self.__class__.__name__}',
+                                         [trigger_type.name
+                                          for trigger_type in CommandTrigger
+                                          if self[trigger_type.value]])
+
+    def _yaml_constructor(self,
+                          loader: Loader,
+                          node: Node) -> 'YamlSerializable':
+        """
+        Deserialize with varargs constructor, not kwargs
+        :param loader:
+        :param node:
+        :return:
+        """
+        return self.__class__.__new__(*loader.construct_sequence(node))
 
 
-class Command:
+class Command(YamlSerializable):
     """
     Some action/callback/handler for an input event from the driver. E.g.,
-    button press, gesture, or pen remappings.
+    button press, gesture, or pen mappings. Button and pen mappings are handled
+    separately.
     """
 
     def __init__(self, command_type: CommandType):
         self._type = command_type
+        super(Command, self).__init__()
 
     def execute(self,
                 event: InputEvent,
@@ -60,6 +92,3 @@ class Command:
                             events to
         """
         ...
-
-
-CommandMap = Mapping[KeyCode, Command]
