@@ -1,12 +1,12 @@
-from veikkd import main
+import veikk.daemon
 
 # TODO: remove; for testing -- a sample command map
 # simple mapping for testing
 from evdev import ecodes
-from veikkd.command.program_command import ProgramCommand
-from veikkd.command.keycombo_command import KeyComboCommand
-from veikkd.command.command import CommandTriggerMap, CommandTrigger, CommandMap
-from veikkd.command.pentransform_command import PenTransformCommand
+from veikk.common.command.program_command import ProgramCommand
+from veikk.common.command.keycombo_command import KeyComboCommand
+from veikk.common.command.command import CommandTriggerMap, CommandTrigger, CommandMap
+from veikk.common.command.pentransform_command import PenTransformCommand
 pen_command = PenTransformCommand()
 command_map: CommandMap = {
     ecodes.ABS_X: pen_command,
@@ -40,4 +40,4 @@ command_map: CommandMap = {
 }
 
 if __name__ == '__main__':
-    main(default_command_map=command_map)
+    veikk.daemon.main(default_command_map=command_map)

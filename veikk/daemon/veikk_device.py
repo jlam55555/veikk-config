@@ -1,13 +1,11 @@
-from typing import Mapping
-
 from evdev import InputDevice, UInput, AbsInfo
 from evdev import ecodes
 
-from veikkd._veikk_device import _VeikkDevice
-from veikkd.command.command import CommandMap
-from veikkd.command.noop_command import NoopCommand
-from veikkd.evdev_util import EvdevUtil
-from veikkd.event_loop import EventLoop
+from ._veikk_device import _VeikkDevice
+from .event_loop import EventLoop
+from ..common.command.command import CommandMap
+from ..common.command.noop_command import NoopCommand
+from ..common.evdev_util import EvdevUtil
 
 # no reason to have to create this multiple times, reuse this instance
 noop = NoopCommand()

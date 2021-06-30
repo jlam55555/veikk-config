@@ -1,0 +1,1 @@
+VEIKK_CONFIG_VERSION = 'v3.0.0a'

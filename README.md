@@ -21,15 +21,17 @@ Install the package globally, so that the root user can access the scripts (nece
 Type hints are used, so this requires at least Python 3.5.
 
 TODO: notes about prerequisites...
+TODO: notes about systemd...
+TODO: warnings about running commands as root...
 
 ```bash
-$ sudo python3 -m pip install --prefix=/usr/local veikkd-config
+$ sudo python3 -m pip install --prefix=/usr/local daemon-config
 ```
 (If you have a venv set up, make sure it is not active -- you want to be using the global Python environment.)
 
 ##### Uninstall
 ```bash
-$ sudo python3 -m pip uninstall veikkd-config
+$ sudo python3 -m pip uninstall daemon-config
 ```
 
 ---
@@ -62,8 +64,8 @@ To test the programs without `pip install`-ing them every time, you can use the 
 The `veikk` and `veikkctl` packages will be installed using distutils. These will expose the [command line scripts](https://python-packaging.readthedocs.io/en/latest/command-line-scripts.html) of the same name.
 ```bash
 (venv) $ pip install .
-(venv) $ veikkd         # run veikkd config daemon
-(venv) $ veikkctl       # run veikk config interface
+(venv) $ daemon         # run daemon config daemon
+(venv) $ cli       # run veikk config interface
 ```
 
 [v2-gui]: https://www.github.com/jlam55555/veikk-linux-driver-gui

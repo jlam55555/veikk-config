@@ -1,19 +1,18 @@
 from typing import Dict
-
 from evdev import InputDevice
 from pyudev import Device
 
-from veikkd.command.command import CommandMap
-from veikkd.config_change_notifier import ConfigChangeNotifier
-from veikkd.evdev_util import EvdevUtil
-from veikkd.event_loop import EventLoop
-from veikkd.udev_util import UdevUtil
-from veikkd.veikk_device import VeikkDevice
+from .config_change_notifier import ConfigChangeNotifier
+from .event_loop import EventLoop
+from .veikk_device import VeikkDevice
+from ..common.command.command import CommandMap
+from ..common.evdev_util import EvdevUtil
+from ..common.udev_util import UdevUtil
 
 
 class VeikkDaemon:
     """
-    Entry point for veikkd command. This is a singleton daemon and there should
+    Entry point for daemon command. This is a singleton daemon and there should
     not be more than one instance of this created, or else unknown chaos (UB)
     will ensue.
     """
@@ -37,7 +36,7 @@ class VeikkDaemon:
 
         # listen to changes
         # TODO: change this to use dbus?
-        ConfigChangeNotifier('/tmp/veikkd')\
+        ConfigChangeNotifier('/tmp/daemon') \
             .listen_thread()
 
     def _add_udev_veikk_device(self, udev_device: Device):

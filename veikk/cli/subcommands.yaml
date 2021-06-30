@@ -1,0 +1,29 @@
+# describing the subcommands that will be created with argparse
+# note that the interactive mode will be created separately and will
+# also be able to handle all of the following commands
+prog: cli
+subcommands:
+  - name: get
+    help: get mapping(s)
+    subcommands:
+      - name: btn
+        help: get button mapping(s)
+      - name: pen
+        help: get pen mapping
+  - name: set
+    help: set mapping
+    subcommands:
+      - name: btn
+        help: set button mapping
+      - name: pen
+        help: set pen mapping
+  - name: edit
+    help: edit config file
+  - name: apply
+    help: apply changes to config file
+  - name: device
+    help: get VEIKK device info
+    func: show_devices
+  - name: version
+    help: show version info
+    func: show_version

@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=VEIKK Configuration Tool
+Comment=Manage VEIKK digitizer and button mappings
+Path=/usr/bin
+# TODO: change this to veikkctl
+Exec=pkexec testpk.sh
+# TODO: edit icon
+Icon=gedit
+Terminal=true
+# Categories=TODO

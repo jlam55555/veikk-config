@@ -16,7 +16,7 @@ setup(name='veikk-config',
       author='Jonathan Lam',
       author_email='jlam55555@gmail.com',
       license='GNU General Public License v2.0',
-      packages=['veikkd', 'veikkd.command', 'veikkctl'],
+      packages=['veikk', 'veikk.cli', 'veikk.daemon'],
       zip_safe=False,
       install_requires=[
           'pyudev',
@@ -24,6 +24,7 @@ setup(name='veikk-config',
       ],
       entry_points={
           'console_scripts': [
-              'veikkd=veikkd.__init__:main'
+              'veikkd=veikk.daemon.__init__:main',
+              'veikkctl=veikk.cli.__init__:main'
           ]
       })

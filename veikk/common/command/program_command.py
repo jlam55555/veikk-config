@@ -4,8 +4,7 @@ from subprocess import Popen
 from typing import List, Mapping, Callable
 from evdev import InputEvent, ecodes
 
-from veikkd.command.command \
-    import Command, CommandType, CommandTriggerMap, CommandTrigger
+from .command import Command, CommandType, CommandTriggerMap, CommandTrigger
 
 
 class ProgramCommand(Command):
