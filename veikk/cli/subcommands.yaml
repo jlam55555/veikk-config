@@ -19,6 +19,7 @@ subcommands:
         help: set pen mapping
   - name: edit
     help: edit config file
+    func: edit_config
   - name: apply
     help: apply changes to config file
   - name: device

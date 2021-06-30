@@ -17,12 +17,14 @@ from .command_handlers import CommandHandlers
 
 class CliParser:
     """
-    Driver code for cli command line tool. Must be run as root (see
-    _check_root()).
+    Entry point for the veikkctl CLI. Must be run as root (see _check_root()).
     """
 
     def __init__(self):
-        CliParser._run_as_root()
+        """
+        Entry point for CLI. Run the parser.
+        """
+        self._run_as_root()
         self._parse()
 
     def _create_parser(self,
@@ -30,6 +32,9 @@ class CliParser:
                        parent: Any = None) -> ArgumentParser:
         """
         Creates a parser from the provided schema. See subcommands.yaml.
+
+        (The type of parent is not exposed in the package, so the type
+        annotation is Any.)
 
         :param schema:  dict of properties describing the current parser
         :param parent:  created by parent_parser.add_subparsers()
@@ -88,10 +93,13 @@ class CliParser:
 
         If already root, this is basically a no-op.
 
+        TODO: change this to use polkit, since that will work with launching
+            as a GUI as well
+
         Similar to https://stackoverflow.com/a/3819134, but uses exec syscall
         rather than subprocess
         """
         if os.geteuid() != 0:
             print('cli is dangerous and must be run as root!\n'
                   'Promoting to root...')
-            os.execvp('sudo', ['-e', sys.executable] + sys.argv)
+            os.execvp('sudo', ['-E', sys.executable] + sys.argv)
