@@ -15,14 +15,14 @@ except ImportError:
 from .command_handlers import CommandHandlers
 
 
-class VeikkControl:
+class CliParser:
     """
     Driver code for cli command line tool. Must be run as root (see
     _check_root()).
     """
 
     def __init__(self):
-        VeikkControl._run_as_root()
+        CliParser._run_as_root()
         self._parse()
 
     def _create_parser(self,

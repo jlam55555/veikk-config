@@ -1,8 +1,8 @@
-from veikk.cli.veikk_control import VeikkControl
+from veikk.cli.cli_parser import CliParser
 
 
 def main():
     """
     Entry point if running as a console script
     """
-    VeikkControl()
+    CliParser()

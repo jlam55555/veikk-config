@@ -10,7 +10,7 @@ from ..common.evdev_util import EvdevUtil
 from ..common.udev_util import UdevUtil
 
 
-class VeikkDaemon:
+class Daemon:
     """
     Entry point for daemon command. This is a singleton daemon and there should
     not be more than one instance of this created, or else unknown chaos (UB)
@@ -36,8 +36,7 @@ class VeikkDaemon:
 
         # listen to changes
         # TODO: change this to use dbus?
-        ConfigChangeNotifier('/tmp/daemon') \
-            .listen_thread()
+        ConfigChangeNotifier('/tmp/veikk').listen_thread()
 
     def _add_udev_veikk_device(self, udev_device: Device):
         """

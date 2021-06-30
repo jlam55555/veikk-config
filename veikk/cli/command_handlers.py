@@ -7,9 +7,9 @@ class CommandHandlers:
     @staticmethod
     def show_devices(_):
         """
-        List all connected VEIKK devices
-        :param _:
-        :return:
+        List all connected VEIKK devices. Each device created by the driver
+        will end in the word "Bundled". (Additional evdev devices created by
+        the mapping daemon will end in "Pen" or "Keyboard".)
         """
         print('Current VEIKK devices:')
         print('\n'.join(['- ' + device.name[:-7]
@@ -19,10 +19,6 @@ class CommandHandlers:
     @staticmethod
     def show_version(_):
         """
-        Show version number
-
-        TODO: get this from somewhere else
-        :param _:
-        :return:
+        Show veikk-config version number.
         """
         print(VEIKK_CONFIG_VERSION)
