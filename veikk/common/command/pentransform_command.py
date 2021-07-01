@@ -70,7 +70,8 @@ class AffineTransform2D(AffineTransformationMatrix):
     def transform(self, vec: Tuple[float, float]) -> Tuple[float, float]:
         m11, m12, m13, m21, m22, m23, _, _, _ = self._matrix
         v1, v2 = vec
-        return m11 * v1 + m12 * v2 + m13, m21 * v1 + m22 * v2 + m23
+        return m11 * v1 + m12 * v2 + m13 * 65536,\
+            m21 * v1 + m22 * v2 + m23 * 65536
 
 
 class AffineTransform1D(AffineTransformationMatrix):
