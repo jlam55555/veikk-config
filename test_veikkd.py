@@ -38,11 +38,11 @@ config = VeikkConfig({
 })
 
 import yaml
-a = yaml.dump(config)
+a = yaml.dump(config, default_flow_style=None)
 b = yaml.load(a, Loader=yaml.Loader)
-c = yaml.dump(b)
+c = yaml.dump(b, default_flow_style=None)
 
-print(a, b)
+print(a, b, c)
 print(a == c)
 
 # if __name__ == '__main__':

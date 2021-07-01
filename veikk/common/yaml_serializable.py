@@ -16,22 +16,17 @@ class YamlSerializable:
     all of the object's keys are exposed, including internal/private ones.
 
     In this representation, the class can explicitly state which keys to
-    serialize by implementing to_yaml_dict(). Note that the output dict should
+    serialize by implementing _to_yaml_dict(). Note that the output dict should
     be passable (as kwargs) to the class's constructor to fully reconstruct
-    the object.
-
-    In other words, instead of automatically exposing all of the member
-    variables, we only expose the constructor parameters necessary to
-    reconstruct the object.
+    the object. to_yaml() and from_yaml() do not have to be reimplemented.
     """
 
     def __init__(self, **kwargs):
         """
         Set up YAML representer and constructor for this class.
         """
-        yaml.add_representer(self.__class__, self._yaml_representer)
-        yaml.add_constructor(f'!{self.__class__.__name__}',
-                             self._yaml_constructor)
+        yaml.add_representer(self.__class__, self.to_yaml)
+        yaml.add_constructor(f'!{self.__class__.__name__}', self.from_yaml)
 
     def _to_yaml_dict(self) -> Dict:
         """
@@ -41,9 +36,8 @@ class YamlSerializable:
         """
         ...
 
-    def _yaml_representer(self,
-                          dumper: Dumper,
-                          data: 'YamlSerializable') -> Node:
+    @classmethod
+    def to_yaml(cls, dumper: Dumper, data: 'YamlSerializable') -> Node:
         """
         Implementation of representer for pyyaml. Represents the object as
         as dict defined by to_yaml_dict
@@ -51,12 +45,11 @@ class YamlSerializable:
         :param data:    representable object
         :return:        YAML mapping representing object
         """
-        return dumper.represent_mapping(f'!{self.__class__.__name__}',
+        return dumper.represent_mapping(f'!{cls.__name__}',
                                         data._to_yaml_dict())
 
-    def _yaml_constructor(self,
-                          loader: Loader,
-                          node: Node) -> 'YamlSerializable':
+    @classmethod
+    def from_yaml(cls, loader: Loader, node: Node) -> 'YamlSerializable':
         """
         Implementation of constructor for pyyaml. Constructs the object by
         passing in the YAML representation (a YAML mapping) as kwargs to
@@ -65,4 +58,4 @@ class YamlSerializable:
         :param node:    YAML mapping representing object
         :return:        object from YAML
         """
-        return self.__class__(**loader.construct_mapping(node, deep=True))
+        return cls(**loader.construct_mapping(node, deep=True))

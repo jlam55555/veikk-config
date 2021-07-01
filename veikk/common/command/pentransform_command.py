@@ -1,15 +1,56 @@
 from typing import Tuple, Dict
 from evdev import UInput, ecodes, InputEvent
+from yaml import Node, Dumper, Loader
 
 from .command import Command, CommandType
+from ..yaml_serializable import YamlSerializable
 
-# TODO: turn these into classes; may need utility functions to generate these
-#   from more human-friendly forms, and need to make them implement
-#   YamlSerializable as well, which is easier with a class
-AffineTransform2D = Tuple[float, float, float,
-                          float, float, float,
-                          float, float, float]
-AffineTransform1D = Tuple[float, float]
+
+class AffineTransformationMatrix(YamlSerializable):
+
+    def __init__(self, matrix: Tuple):
+        self._matrix = tuple(map(float, matrix))
+        self._verify_tuple()
+        super(AffineTransformationMatrix, self).__init__()
+
+    def _verify_tuple(self): ...
+
+    @classmethod
+    def to_yaml(cls,
+                dumper: Dumper,
+                data: 'AffineTransformationMatrix') -> Node:
+        """
+        Overwrite with simpler constructor
+        :param dumper:
+        :param data:
+        :return:
+        """
+        return dumper.represent_sequence(f'!{cls.__name__}',
+                                         data._matrix)
+
+    @classmethod
+    def from_yaml(cls,
+                  loader: Loader,
+                  node: Node) -> 'YamlSerializable':
+        return cls(loader.construct_sequence(node))
+
+
+class AffineTransform2D(AffineTransformationMatrix):
+    def _verify_tuple(self) -> bool:
+        """
+        TODO: more advanced check
+        :return:
+        """
+        return len(self._matrix) == 9
+
+
+class AffineTransform1D(AffineTransformationMatrix):
+    def _verify_tuple(self) -> bool:
+        """
+        TODO: more advanced check
+        :return:
+        """
+        return len(self._matrix) == 4
 
 
 class PenTransformCommand(Command):
@@ -22,11 +63,12 @@ class PenTransformCommand(Command):
                  coord_transform: AffineTransform2D = None,
                  pressure_transform: AffineTransform1D = None) -> None:
         if coord_transform is None:
-            coord_transform = (1, 0, 0,
-                               0, 1, 0,
-                               0, 0, 1)
+            coord_transform = AffineTransform2D((1, 0, 0,
+                                                 0, 1, 0,
+                                                 0, 0, 1))
         if pressure_transform is None:
-            pressure_transform = (1, 0)
+            pressure_transform = AffineTransform1D((1, 0,
+                                                    0, 1))
 
         self._prev_coords: Tuple[int, int] = (0, 0)
         self._coord_transform = coord_transform

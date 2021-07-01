@@ -26,7 +26,7 @@ class CommandTrigger(Enum):
     KEYPRESS = 2
 
 
-class CommandTriggerMap(tuple, YamlSerializable):
+class CommandTriggerMap(YamlSerializable):
     """
     Used to indicate which trigger type(s) trigger an action.
     Used in ProgramCommand.
@@ -36,39 +36,39 @@ class CommandTriggerMap(tuple, YamlSerializable):
         from daemon.command.command import CommandTrigger as trigger
         ProgramTrigger(..., CommandTriggerMap(trigger.KEYDOWN, trigger.KEYUP))
     """
-    def __new__(cls, *trigger_types: CommandTrigger):
-        return tuple.__new__(CommandTriggerMap,
-                             (CommandTrigger.KEYUP in trigger_types,
-                              CommandTrigger.KEYDOWN in trigger_types,
-                              CommandTrigger.KEYPRESS in trigger_types))
-    
-    def __init__(self, *trigger_types: CommandTrigger):
+
+    def __init__(self, *trigger_map: CommandTrigger):
+        self._trigger_map = (CommandTrigger.KEYUP in trigger_map,
+                             CommandTrigger.KEYDOWN in trigger_map,
+                             CommandTrigger.KEYPRESS in trigger_map)
         super(CommandTriggerMap, self).__init__()
 
-    def _yaml_representer(self,
-                          dumper: Dumper,
-                          data: 'YamlSerializable') -> Node:
+    def __getitem__(self, item):
+        return self._trigger_map[item]
+
+    @classmethod
+    def to_yaml(cls, dumper: Dumper, data: 'CommandTriggerMap') -> Node:
         """
-        Serialize in the same form as the constructor.
+        Serialize, translate numbers to names
         :param dumper:
         :param data:
         :return:
         """
-        return dumper.represent_sequence(f'!{self.__class__.__name__}',
+        return dumper.represent_sequence(f'!{cls.__name__}',
                                          [trigger_type.name
                                           for trigger_type in CommandTrigger
-                                          if self[trigger_type.value]])
+                                          if data[trigger_type.value]])
 
-    def _yaml_constructor(self,
-                          loader: Loader,
-                          node: Node) -> 'YamlSerializable':
+    @classmethod
+    def from_yaml(cls, loader: Loader, node: Node) -> 'CommandTriggerMap':
         """
-        Deserialize with varargs constructor, not kwargs
+        Deserialize, translate names to numbers
         :param loader:
         :param node:
         :return:
         """
-        return self.__class__.__new__(*loader.construct_sequence(node))
+        return cls(*map(lambda x: CommandTrigger[x],
+                        loader.construct_sequence(node)))
 
 
 class Command(YamlSerializable):
