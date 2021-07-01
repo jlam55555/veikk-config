@@ -3,7 +3,7 @@ from typing import Dict
 import yaml
 from yaml import Dumper, Node, Loader
 
-# turn off aliasing globally -- this makes things harder to read and doesn't
+# turn off aliasing globally -- aliasing makes things harder to read and doesn't
 # really have any performance difference; the only implication this has is that
 # we can't "couple" different keycodes under the same command, which is fine
 Dumper.ignore_aliases = lambda *args: True

@@ -3,6 +3,8 @@ import veikk.daemon
 # TODO: remove; for testing -- a sample command map
 # simple mapping for testing
 from evdev import ecodes
+
+from veikk.common.command.pentransform_command import PenTransformCommand, AffineTransform2D
 from veikk.common.command.program_command import ProgramCommand
 from veikk.common.command.keycombo_command import KeyComboCommand
 from veikk.common.command.command import CommandTriggerMap, CommandTrigger
@@ -14,7 +16,7 @@ config = VeikkConfig({
     ecodes.BTN_STYLUS2: KeyComboCommand([ecodes.BTN_STYLUS2]),
     ecodes.BTN_0: ProgramCommand(['echo', 'Hello, world!', ';', 'read'], True),
     ecodes.BTN_1: ProgramCommand(['htop'], True,
-                                 popen_options={'start_new_session':True}),
+                                 popen_options={'start_new_session': True}),
     ecodes.BTN_2: KeyComboCommand([ecodes.KEY_LEFTCTRL,
                                    ecodes.KEY_RIGHTSHIFT,
                                    ecodes.KEY_E]),
@@ -35,9 +37,10 @@ config = VeikkConfig({
     ecodes.BTN_SOUTH: KeyComboCommand([ecodes.KEY_MINUS]),
     ecodes.BTN_TOOL_DOUBLETAP: KeyComboCommand([ecodes.KEY_LEFTCTRL,
                                                 ecodes.KEY_0])
-})
+}, PenTransformCommand(AffineTransform2D((0, 1, 0, 1, 0, 0, 0, 0, 1))))
 
 import yaml
+
 a = yaml.dump(config, default_flow_style=None)
 b = yaml.load(a, Loader=yaml.Loader)
 c = yaml.dump(b, default_flow_style=None)
@@ -45,5 +48,5 @@ c = yaml.dump(b, default_flow_style=None)
 print(a, b, c)
 print(a == c)
 
-# if __name__ == '__main__':
-#     veikk.daemon.main(default_config=config)
+if __name__ == '__main__':
+    veikk.daemon.main(default_config=config)

@@ -1,9 +1,10 @@
+from typing import Dict
+
 from evdev import InputDevice, UInput, AbsInfo
 from evdev import ecodes
 
 from ._veikk_device import _VeikkDevice
 from .event_loop import EventLoop
-from ..common.command.noop_command import NoopCommand
 from ..common.evdev_util import EvdevUtil
 
 # no reason to have to create this multiple times, reuse this instance
@@ -15,14 +16,19 @@ class VeikkDevice(_VeikkDevice):
     def __init__(self,
                  device: InputDevice,
                  event_loop: EventLoop,
-                 config: VeikkConfig) -> None:
+                 config: VeikkConfig,
+                 models_info: Dict) -> None:
 
         self._device: InputDevice = device
         self._config = config
 
+        # configure device-specific features
+        self._device_specific_setup()
+
         # remove the word " Bundled" from the device name
         self._device_name = device.name[:-8]
 
+        # create virtual pen and keyboard devices for commands to use
         self._uinput_devices = (self._setup_uinput_pen(),
                                 self._setup_uinput_keyboard())
 
@@ -39,6 +45,16 @@ class VeikkDevice(_VeikkDevice):
 
         self._event_loop = event_loop
         self._event_loop.register_device(self)
+
+    def _device_specific_setup(self) -> None:
+        """
+        Retrieves information about the VEIKK model and performs
+        device-specific setup.
+
+        One task is to map each device to a square, because otherwise
+        the transforms don't work as expected. This way,
+        """
+        pass
 
     def _setup_uinput_pen(self) -> UInput:
         """

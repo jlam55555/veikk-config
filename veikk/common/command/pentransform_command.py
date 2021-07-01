@@ -1,4 +1,4 @@
-from typing import Tuple, Dict
+from typing import Tuple, Dict, List
 from evdev import UInput, ecodes, InputEvent
 from yaml import Node, Dumper, Loader
 
@@ -7,6 +7,20 @@ from ..yaml_serializable import YamlSerializable
 
 
 class AffineTransformationMatrix(YamlSerializable):
+    """
+    Representation of an affine transformation matrix. This allows for a linear
+    transformation along with a possible offset. For an affine transformation
+    in N-dimensional space, the transformation matrix is (N+1)x(N+1), and the
+    input vector gets augmented with a 1 in the last coordinate.
+
+    It will be assumed that the transform matrix is valid, but checks can be
+    put in _verify_tuple(). Additionally, the transform() method may assume
+    that the transformation matrix is in the standard form for simplicity
+    (e.g., ignoring the last row of the matrix entirely -- these are not
+    needed in an affine transformation).
+
+    https://en.wikipedia.org/wiki/Transformation_matrix#Affine_transformations
+    """
 
     def __init__(self, matrix: Tuple):
         self._matrix = tuple(map(float, matrix))
@@ -14,6 +28,8 @@ class AffineTransformationMatrix(YamlSerializable):
         super(AffineTransformationMatrix, self).__init__()
 
     def _verify_tuple(self): ...
+
+    def transform(self, vec: Tuple) -> Tuple: ...
 
     @classmethod
     def to_yaml(cls,
@@ -43,6 +59,11 @@ class AffineTransform2D(AffineTransformationMatrix):
         """
         return len(self._matrix) == 9
 
+    def transform(self, vec: Tuple[float, float]) -> Tuple[float, float]:
+        m11, m12, m13, m21, m22, m23, _, _, _ = self._matrix
+        v1, v2 = vec
+        return m11 * v1 + m12 * v2 + m13, m21 * v1 + m22 * v2 + m23
+
 
 class AffineTransform1D(AffineTransformationMatrix):
     def _verify_tuple(self) -> bool:
@@ -70,7 +91,7 @@ class PenTransformCommand(Command):
             pressure_transform = AffineTransform1D((1, 0,
                                                     0, 1))
 
-        self._prev_coords: Tuple[int, int] = (0, 0)
+        self._coords: Tuple[int, int] = (0, 0)
         self._coord_transform = coord_transform
         self._pressure_transform = pressure_transform
         super(PenTransformCommand, self).__init__(CommandType.PEN_TRANSFORM)
@@ -78,10 +99,30 @@ class PenTransformCommand(Command):
     def execute(self,
                 event: InputEvent,
                 devices: Tuple[UInput, UInput]) -> None:
+        """
+        Note: if either X or Y get updated, then the transformed X and Y will
+        both get emitted. This may be a little inefficient, but it's necessary
+        if there's any rotation. Plus, there will still be the same number of
+        SYN events, so it probably won't affect performance much.
+        :param event:
+        :param devices:
+        :return:
+        """
+
+        # pressure transform
         if event.code == ecodes.ABS_PRESSURE:
-            devices[0].write(event.type, event.code, event.value)
+            value = int(self._pressure_transform.transform((event.value,))[0])
+            devices[0].write(event.type, event.code, value)
+
+        # screen mapping transform
         elif event.code == ecodes.ABS_X or event.code == ecodes.ABS_Y:
-            devices[0].write_event(event)
+            if event.code == ecodes.ABS_X:
+                self._coords = (event.value, self._coords[1])
+            else:
+                self._coords = (self._coords[0], event.value)
+            value = self._coord_transform.transform(self._coords)
+            devices[0].write(event.type, ecodes.ABS_X, int(value[0]))
+            devices[0].write(event.type, ecodes.ABS_Y, int(value[1]))
 
         # maybe tilt support in the future?
 

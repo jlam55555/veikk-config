@@ -8,6 +8,7 @@ from .veikk_device import VeikkDevice
 from ..common.evdev_util import EvdevUtil
 from ..common.udev_util import UdevUtil
 from ..common.veikk_config import VeikkConfig
+from ..common.veikk_model import VeikkModel
 
 
 class Daemon:
@@ -21,6 +22,9 @@ class Daemon:
         if default_config is None:
             default_config = {}
         self._config = default_config
+
+        # get models data
+        self._models_data = VeikkModel.get_models_data()
 
         # event loop listens in the background forever
         self._event_loop = EventLoop()
@@ -55,8 +59,10 @@ class Daemon:
         :param device:
         :return:
         """
-        self._veikk_devices[device.path] \
-            = VeikkDevice(device, self._event_loop, self._config)
+        self._veikk_devices[device.path] = VeikkDevice(device,
+                                                       self._event_loop,
+                                                       self._config,
+                                                       self._models_data)
 
     def _remove_udev_veikk_device(self, udev_device: Device):
         """
