@@ -1,4 +1,4 @@
-from typing import Tuple, Dict, List
+from typing import Tuple, Dict
 from evdev import UInput, ecodes, InputEvent
 from yaml import Node, Dumper, Loader
 
@@ -8,10 +8,12 @@ from ..yaml_serializable import YamlSerializable
 
 class AffineTransformationMatrix(YamlSerializable):
     """
-    Representation of an affine transformation matrix. This allows for a linear
-    transformation along with a possible offset. For an affine transformation
-    in N-dimensional space, the transformation matrix is (N+1)x(N+1), and the
-    input vector gets augmented with a 1 in the last coordinate.
+    Representation of an affine transformation matrix (in row-major order).
+
+    This allows for a linear coordinate transformation along with a possible
+    offset. For an affine transformation in N-dimensional space, the
+    transformation matrix is (N+1)x(N+1), and the input vector gets augmented
+    with a 1 in the last coordinate.
 
     It will be assumed that the transform matrix is valid, but checks can be
     put in _verify_tuple(). Additionally, the transform() method may assume
@@ -19,6 +21,12 @@ class AffineTransformationMatrix(YamlSerializable):
     (e.g., ignoring the last row of the matrix entirely -- these are not
     needed in an affine transformation).
 
+    This matches the behavior when using the `xinput` tool and setting the
+    `Coordinate Transformation Matrix` property on a pointer device -- setting
+    the coordinate transform here or there are functionally equivalent, but
+    the CLI helps you generate the transform matrix.
+
+    https://wiki.ubuntu.com/X/InputCoordinateTransformation
     https://en.wikipedia.org/wiki/Transformation_matrix#Affine_transformations
     """
 
@@ -72,6 +80,9 @@ class AffineTransform1D(AffineTransformationMatrix):
         :return:
         """
         return len(self._matrix) == 4
+
+    def transform(self, vec: Tuple[float]) -> Tuple[float]:
+        return self._matrix[0] * vec[0] + self._matrix[1],
 
 
 class PenTransformCommand(Command):
