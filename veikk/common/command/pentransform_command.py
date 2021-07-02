@@ -39,6 +39,8 @@ class AffineTransformationMatrix(YamlSerializable):
 
     def transform(self, vec: Tuple) -> Tuple: ...
 
+    def __getitem__(self, item: Tuple) -> float: ...
+
     @classmethod
     def to_yaml(cls,
                 dumper: Dumper,
@@ -72,6 +74,15 @@ class AffineTransform2D(AffineTransformationMatrix):
         v1, v2 = vec
         return m11 * v1 + m12 * v2 + m13 * 65536,\
             m21 * v1 + m22 * v2 + m23 * 65536
+
+    def __getitem__(self, item: Tuple[int, int]) -> float:
+        """
+        Simple numpy-style tuple indexing. Coordinates are (y, x) order.
+        :param item:
+        :return:
+        """
+        y, x = item
+        return self._matrix[3*y + x]
 
 
 class AffineTransform1D(AffineTransformationMatrix):

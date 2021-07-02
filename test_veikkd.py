@@ -37,24 +37,7 @@ config = VeikkConfig({
     ecodes.BTN_SOUTH: KeyComboCommand([ecodes.KEY_MINUS]),
     ecodes.BTN_TOOL_DOUBLETAP: KeyComboCommand([ecodes.KEY_LEFTCTRL,
                                                 ecodes.KEY_0])
-}, PenTransformCommand(AffineTransform2D((0, 1, 0, -1, 0, 1, 0, 0, 1))))
-
-rotations = [
-    (1, 0, 0, 0, 1, 0, 0, 0, 1),    # regular
-    (0, 1, 0, -1, 0, 1, 0, 0, 1),   # ccw 90
-    (-1, 0, 1, 0, -1, 1, 0, 0, 1),  # flipped
-    (0, -1, 1, 1, 0, 0, 0, 0, 1)    # cw 90
-]
-
-
-def scale_matrix(screen_x, screen_y,
-                 offset_x, offset_y,
-                 width_x, width_y):
-    offset_x_norm, offset_y_norm = offset_x/screen_x, offset_y/screen_y
-    scale_x, scale_y = width_x/screen_x, width_y/screen_y
-    return (scale_x, 0, offset_x_norm,
-            0, scale_y, offset_y_norm,
-            0, 0, 1)
+}, PenTransformCommand(AffineTransform2D((0.0, -0.5, 0.75, 0.5, 0.0, 0.25, 0.0, 0.0, 1.0))))
 
 import yaml
 
