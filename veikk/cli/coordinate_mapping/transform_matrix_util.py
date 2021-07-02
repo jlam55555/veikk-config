@@ -41,14 +41,14 @@ class TransformMatrixUtil:
     @classmethod
     def get_rotation_scale_offset_matrix(cls,
                                          orientation: Orientation,
-                                         screen_x: int,
-                                         screen_y: int,
+                                         screen_width: int,
+                                         screen_height: int,
                                          offset_x: int,
                                          offset_y: int,
                                          width_x: int,
                                          width_y: int) -> AffineTransform2D:
         return cls.matrix3_multiply(
-            cls.get_scale_offset_matrix(screen_x, screen_y,
+            cls.get_scale_offset_matrix(screen_width, screen_height,
                                         offset_x, offset_y,
                                         width_x, width_y),
             cls.get_rotation_matrix(orientation)
@@ -59,14 +59,16 @@ class TransformMatrixUtil:
         return AffineTransform2D(cls._rotations[orientation])
 
     @staticmethod
-    def get_scale_offset_matrix(screen_x: int,
-                                screen_y: int,
+    def get_scale_offset_matrix(screen_width: int,
+                                screen_height: int,
                                 offset_x: int,
                                 offset_y: int,
                                 width_x: int,
                                 width_y: int) -> AffineTransform2D:
-        offset_x_norm, offset_y_norm = offset_x / screen_x, offset_y / screen_y
-        scale_x, scale_y = width_x / screen_x, width_y / screen_y
+        offset_x_norm, offset_y_norm = offset_x / screen_width, \
+                                       offset_y / screen_height
+        scale_x, scale_y = width_x / screen_width, \
+                           width_y / screen_height
         return AffineTransform2D((scale_x, 0, offset_x_norm,
                                   0, scale_y, offset_y_norm,
                                   0, 0, 1))

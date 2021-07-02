@@ -37,7 +37,7 @@ config = VeikkConfig({
     ecodes.BTN_SOUTH: KeyComboCommand([ecodes.KEY_MINUS]),
     ecodes.BTN_TOOL_DOUBLETAP: KeyComboCommand([ecodes.KEY_LEFTCTRL,
                                                 ecodes.KEY_0])
-}, PenTransformCommand(AffineTransform2D((0.0, -0.5, 0.75, 0.5, 0.0, 0.25, 0.0, 0.0, 1.0))))
+}, PenTransformCommand(AffineTransform2D((0.0, 0.1564453125, 0.78125, -0.3014521782674011, 0.0, 0.9323985978968453, 0.0, 0.0, 1.0))))
 
 import yaml
 

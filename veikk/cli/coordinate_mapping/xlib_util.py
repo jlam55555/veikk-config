@@ -53,5 +53,3 @@ def get_display_info():
 
     return result
 
-
-print(get_display_info())
