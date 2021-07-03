@@ -1,6 +1,7 @@
 evdev==1.4.0
 pyudev==0.22.0
 six==1.16.0
-dbus-python==1.2.16
+pydbus==0.6.0
 PyYAML==5.4.1
 xlib==0.21
+PyGObject==3.40.1

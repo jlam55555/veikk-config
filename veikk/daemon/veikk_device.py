@@ -5,9 +5,9 @@ from evdev import ecodes
 
 from ._veikk_device import _VeikkDevice
 from .event_loop import EventLoop
-from ..common.command.pentransform_command import AffineTransform1D
 from ..common.constants import VEIKK_MAPPED_DIM
 from ..common.evdev_util import EvdevUtil
+from ..common.transform_matrix_util import AffineTransform1D
 from ..common.veikk_config import VeikkConfig
 from ..common.veikk_model import VeikkModel
 

@@ -3,8 +3,8 @@ from typing import Tuple
 
 from yaml import Dumper, Node, Loader
 
-from ...common.constants import VEIKK_MAPPED_DIM
-from ...common.yaml_serializable import YamlSerializable
+from veikk.common.constants import VEIKK_MAPPED_DIM
+from veikk.common.yaml_serializable import YamlSerializable
 
 
 class AffineTransformationMatrix(YamlSerializable):

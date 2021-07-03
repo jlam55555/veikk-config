@@ -2,7 +2,7 @@ from typing import Tuple, Dict
 from evdev import UInput, ecodes, InputEvent
 
 from .command import Command, CommandType
-from ...cli.coordinate_mapping.transform_matrix_util import AffineTransform2D, \
+from ...common.transform_matrix_util import AffineTransform2D, \
     AffineTransform1D
 
 
