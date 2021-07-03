@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 # read the contents of your README file
 # https://packaging.python.org/guides/making-a-pypi-friendly-readme/
@@ -16,7 +16,7 @@ setup(name='veikk-config',
       author='Jonathan Lam',
       author_email='jlam55555@gmail.com',
       license='GNU General Public License v2.0',
-      packages=['veikk', 'veikk.cli', 'veikk.daemon'],
+      packages=find_packages(),
       zip_safe=False,
       install_requires=[
           'pyudev',

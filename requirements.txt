@@ -4,4 +4,3 @@ six==1.16.0
 dbus-python==1.2.16
 PyYAML==5.4.1
 xlib==0.21
-wxPython==4.1.1

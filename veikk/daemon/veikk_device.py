@@ -121,7 +121,7 @@ class VeikkDevice(_VeikkDevice):
                             for code, _ in ecodes.bytype[ecodes.EV_KEY].items()
                             if not EvdevUtil.is_pen_event(code)]
         }
-        input_props = None
+        input_props = [ecodes.INPUT_PROP_BUTTONPAD]
         return UInput(events=capabilities,
                       name=f'{self._model_name} Keyboard',
                       input_props=input_props)
