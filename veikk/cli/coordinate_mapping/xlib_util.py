@@ -1,55 +1,41 @@
-from Xlib import X, display
-from Xlib.ext import randr
+"""
+This file serves as a fallback in case wxpython is not installed.
+"""
+
+from typing import Tuple, List
+
+from Xlib.display import Display
 
 
-# TODO: cite this
+def get_monitors() -> List[Tuple[int, int, int, int]]:
+    """
+    Gets the offsets and sizes (in pixels) of all the monitors as a list of
+    tuples (x_offset, y_offset, width, height).
+    """
+    display = Display()
+    root = display.screen().root
+    resources = root.xrandr_get_screen_resources()._data
+    config_timestamp = resources['config_timestamp']
 
-# display = display.Display(':0')
-#
-# print(display.screen_count())
-#
-# root = display.screen().root
-# print(root.get_geometry().width)
-# print(root.get_geometry().height)
-
-# d = display.Display()
-# s = d.screen()
-# window = s.root.create_window(0, 0, 1, 1, 1, s.root_depth)
-#
-# res = randr.get_screen_resources(window)
-# for mode in res.modes:
-#     w, h = mode.width, mode.height
-#     print(f'width: {w}, height: {h}')
-
-def find_mode(id, modes):
-    for mode in modes:
-        if id == mode.id:
-            return f'{mode.width}x{mode.height}'
-
-
-def get_display_info():
-    d = display.Display(':0')
-    screen_count = d.screen_count()
-    default_screen = d.get_default_screen()
-    result = []
-    screen = 0
-    info = d.screen(screen)
-    window = info.root
-
-    res = randr.get_screen_resources(window)
-    for output in res.outputs:
-        params = d.xrandr_get_output_info(output, res.config_timestamp)
-        if not params.crtc:
+    outputs_data = []
+    for output in resources['outputs']:
+        crtc = display\
+            .xrandr_get_output_info(output, config_timestamp)._data['crtc']
+        if crtc == 0:
             continue
-        crtc = d.xrandr_get_crtc_info(params.crtc, res.config_timestamp)
-        modes = set()
-        for mode in params.modes:
-            modes.add(find_mode(mode, res.modes))
-        result.append({
-            'name': params.name,
-            'resolution': f'{crtc.width}x{crtc.height}',
-            'available_resolutions': list(modes)
-        })
 
-    return result
+        monitor_info = display\
+            .xrandr_get_crtc_info(crtc, config_timestamp)._data
+        outputs_data.append((monitor_info['x'], monitor_info['y'],
+                             monitor_info['width'], monitor_info['height']))
+    return outputs_data
 
+
+def get_total_screen_rect() -> Tuple[int, int]:
+    """
+    Returns the size of all the screens put together (the smallest rectangle
+    containing the unions of all of the displays).
+    """
+    display = Display()
+    screen = display.screen()
+    return screen['width_in_pixels'], screen['height_in_pixels']

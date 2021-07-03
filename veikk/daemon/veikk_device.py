@@ -6,6 +6,7 @@ from evdev import ecodes
 from ._veikk_device import _VeikkDevice
 from .event_loop import EventLoop
 from ..common.command.pentransform_command import AffineTransform1D
+from ..common.constants import VEIKK_MAPPED_DIM
 from ..common.evdev_util import EvdevUtil
 from ..common.veikk_config import VeikkConfig
 from ..common.veikk_model import VeikkModel
@@ -15,9 +16,6 @@ class VeikkDevice(_VeikkDevice):
     """
     Model for a connected VEIKK device whose outputs are being mapped.
     """
-
-    # max x and y reported by the tablet after the initial mapping
-    MAPPED_DIM = 65536
 
     def __init__(self,
                  device: InputDevice,
@@ -78,10 +76,10 @@ class VeikkDevice(_VeikkDevice):
 
         self._model = models_info[self._model_name]
 
-        # transforms all coordinates to MAPPED_DIM x MAPPED_DIM so that
+        # transforms all coordinates to VEIKK_MAPPED_DIM x VEIKK_MAPPED_DIM so that
         # rotations work as expected
-        ratio_x, ratio_y = VeikkDevice.MAPPED_DIM/self._model.x_max,\
-                           VeikkDevice.MAPPED_DIM/self._model.y_max
+        ratio_x, ratio_y = VEIKK_MAPPED_DIM/self._model.x_max,\
+                           VEIKK_MAPPED_DIM/self._model.y_max
         self._pen_pretransform_matrix = (AffineTransform1D((ratio_x, 0)),
                                          AffineTransform1D((ratio_y, 0)))
 
@@ -96,11 +94,9 @@ class VeikkDevice(_VeikkDevice):
         capabilities = {
             ecodes.EV_KEY: EvdevUtil.get_pen_evkey_events(),
             ecodes.EV_ABS: [
-                (ecodes.ABS_X, AbsInfo(value=0,
-                                       min=0, max=VeikkDevice.MAPPED_DIM,
+                (ecodes.ABS_X, AbsInfo(value=0, min=0, max=VEIKK_MAPPED_DIM,
                                        fuzz=0, flat=0, resolution=100)),
-                (ecodes.ABS_Y, AbsInfo(value=0,
-                                       min=0, max=VeikkDevice.MAPPED_DIM,
+                (ecodes.ABS_Y, AbsInfo(value=0, min=0, max=VEIKK_MAPPED_DIM,
                                        fuzz=0, flat=0, resolution=100)),
                 (ecodes.ABS_PRESSURE, AbsInfo(value=0, min=0, max=8192,
                                               fuzz=0, flat=0,
@@ -133,7 +129,7 @@ class VeikkDevice(_VeikkDevice):
     def _pen_pretransform(self, event: InputEvent) -> None:
         """
         For pen ABS_X and ABS_Y events, first linearly transform the coordinates
-        to a MAPPED_DIM x MAPPED_DIM square. This is for rotations to work
+        to a VEIKK_MAPPED_DIM x VEIKK_MAPPED_DIM square. This is for rotations to work
         correctly. See _device_specific_setup() for details.
 
         Is a no-op if the event is not ABS_X or ABS_Y.
