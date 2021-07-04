@@ -31,6 +31,14 @@ class ProgramCommand(Command):
 
         super(ProgramCommand, self).__init__(CommandType.PROGRAM)
 
+    def _verify(self) -> None:
+        """
+        Perform any necessary checks.
+
+        TODO: what checks should be made?
+        """
+        pass
+
     def execute(self, event: InputEvent, _):
         """
         Execute program command. We use the event to see if it is one of the

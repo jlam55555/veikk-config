@@ -54,6 +54,18 @@ class VeikkConfig(YamlSerializable):
         self._pen_transform = pen_transform
         super(VeikkConfig, self).__init__()
 
+    def _verify(self) -> None:
+        """
+        Verify that the configuration is valid. Checks all subcommands.
+        """
+        for btn, cmd in self._btn_map.items():
+            assert EvdevUtil.is_valid_keycode(btn)
+            assert not isinstance(cmd, PenTransformCommand)
+            cmd._verify()
+
+        if self._pen_transform is not None:
+            self._pen_transform._verify()
+
     def map_button(self, code: KeyCode, command: Command) -> None:
         """
         Assigns a command to a keycode

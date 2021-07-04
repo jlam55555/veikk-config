@@ -36,11 +36,14 @@ class AffineTransformationMatrix(YamlSerializable):
         self._verify_tuple()
         super(AffineTransformationMatrix, self).__init__()
 
-    def _verify_tuple(self): ...
+    def _verify_tuple(self):
+        raise NotImplementedError()
 
-    def transform(self, vec: Tuple) -> Tuple: ...
+    def transform(self, vec: Tuple) -> Tuple:
+        raise NotImplementedError()
 
-    def __getitem__(self, item: Tuple) -> float: ...
+    def __getitem__(self, item: Tuple) -> float:
+        raise NotImplementedError()
 
     @classmethod
     def to_yaml(cls,

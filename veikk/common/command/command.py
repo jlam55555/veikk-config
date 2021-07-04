@@ -91,4 +91,4 @@ class Command(YamlSerializable):
         :param devices:     the pen and keyboard virtual devices to dispatch
                             events to
         """
-        ...
+        raise NotImplementedError()

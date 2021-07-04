@@ -10,6 +10,9 @@ class NoopCommand(Command):
     def __init__(self):
         super(NoopCommand, self).__init__(CommandType.NOOP)
 
+    def _verify(self) -> None:
+        pass
+
     def execute(self, _, __):
         if __debug__:
             print('event -> noop')

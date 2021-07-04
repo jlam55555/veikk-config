@@ -18,6 +18,14 @@ class KeyComboCommand(Command):
         self._keycodes = keycodes
         super(KeyComboCommand, self).__init__(CommandType.KEY_COMBO)
 
+    def _verify(self) -> None:
+        """
+        Perform any necessary checks.
+
+        TODO: what checks should be performed?
+        """
+        pass
+
     def execute(self,
                 event: InputEvent,
                 devices: Tuple[UInput, UInput]) -> None:

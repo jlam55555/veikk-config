@@ -28,6 +28,14 @@ class PenTransformCommand(Command):
         self._pressure_transform = pressure_transform
         super(PenTransformCommand, self).__init__(CommandType.PEN_TRANSFORM)
 
+    def _verify(self) -> None:
+        """
+        Perform any necessary checks.
+
+        TODO: what checks should be performed?
+        """
+        pass
+
     def execute(self,
                 event: InputEvent,
                 devices: Tuple[UInput, UInput]) -> None:

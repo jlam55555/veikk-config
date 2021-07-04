@@ -30,9 +30,10 @@ class YamlSerializable:
 
     def _verify(self) -> None:
         """
-        Performs verification on an object after construction from YAML
+        Performs (semantic) verification on an object after construction from
+        YAML. (Object should already be structurally correct.)
         """
-        ...
+        raise NotImplementedError()
 
     def _to_yaml_dict(self) -> Dict:
         """
@@ -40,7 +41,7 @@ class YamlSerializable:
         of this dict should include the named parameters of the constructor
         :return:    dictionary representing the object
         """
-        ...
+        raise NotImplementedError()
 
     @classmethod
     def to_yaml(cls, dumper: Dumper, data: 'YamlSerializable') -> Node:
