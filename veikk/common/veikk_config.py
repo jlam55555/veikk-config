@@ -70,6 +70,12 @@ class VeikkConfig(YamlSerializable):
         """
         self.map_button(code, self._noop)
 
+    def map_pen(self, command: PenTransformCommand) -> None:
+        """
+        Assigns a mapping for the pen.
+        """
+        self._pen_transform = command
+
     def execute_event(self,
                       event: InputEvent,
                       devices: Tuple[UInput, UInput]) -> None:

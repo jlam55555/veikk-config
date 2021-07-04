@@ -59,3 +59,25 @@ class YamlSerializable:
         :return:        object from YAML
         """
         return cls(**loader.construct_mapping(node, deep=True))
+
+    @classmethod
+    def load_yaml(cls, obj_yaml: str) -> 'YamlSerializable':
+        """
+        Load from YAML using default loading properties and input validation.
+        :param obj_yaml:    serialized object
+        :return:            deserialized object
+        """
+        obj = yaml.load(obj_yaml, Loader=Loader)
+
+        # input validation
+        assert isinstance(obj, cls)
+        # TODO: additional verification
+
+        return obj
+
+    def dump_yaml(self) -> str:
+        """
+        Dump object to YAML using default serialization properties.
+        :return:        serialized object
+        """
+        return yaml.dump(self, Dumper=Dumper, default_flow_style=None)

@@ -63,7 +63,7 @@ class CliParser:
 
         return parser
 
-    def _parse(self):
+    def _parse(self) -> None:
         """
         Parse arguments using argparse. Uses subcommand syntax with single-
         character aliases for a nice CLI interface.

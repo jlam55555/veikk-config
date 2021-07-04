@@ -1,7 +1,9 @@
 from pydbus import SystemBus
 from gi.repository import GLib
 
-from veikk.common.command.command import KeyCode
+from veikk.common.command.command import KeyCode, Command
+from veikk.common.command.pentransform_command import PenTransformCommand
+from veikk.common.evdev_util import EvdevUtil
 from veikk.common.veikk_config import VeikkConfig
 
 
@@ -59,22 +61,53 @@ class VeikkDaemonDbusObject:
         self._config = config
 
     def MapButton(self, _device: int, keycode: KeyCode, command: str) -> None:
-        print('got MapButton request')
+        """
+        Map a button to command
+        :param _device:     (not implemented)
+        :param keycode:     button to map (integer keycode)
+        :param command:     serialized button mapping command
+        """
+        cmd = Command.load_yaml(command)
+
+        assert not isinstance(cmd, PenTransformCommand)
+        assert EvdevUtil.is_valid_keycode(keycode)
+
+        self._config.map_button(keycode, cmd)
 
     def MapPen(self, _device: int, command: str) -> None:
-        print('got MapPen request')
+        """
+        Set a pen transform
+        :param _device:     (not implemented)
+        :param command:     serialized pen transform to apply
+        """
+        cmd = PenTransformCommand.load_yaml(command)
+        self._config.map_pen(cmd)
 
     def GetCurrentConfig(self, _device: int) -> str:
-        print('got GetCurrentConfig request')
-        return 'testing object'
+        """
+        Returns the current command
+        :param _device:     (not implemented)
+        :return:            serialized current configuration
+        """
+        return self._config.dump_yaml()
 
     def LoadConfigFromFile(self, _device: int, filename: str) -> None:
+        """
+        Sets the active configuration from a file.
+        :param _device:     (not implemented)
+        :param filename:    file to read from
+        """
         with open(filename, 'r') as fd:
-            print(f'read file contents: {fd.read()}')
+            self._config = VeikkConfig.load_yaml(fd.read())
 
     def SaveConfigToFile(self, _device: int, filename: str) -> None:
+        """
+        Saves the active configuration to a file.
+        :param _device:     (not implemented)
+        :param filename:    file to write to
+        """
         with open(filename, 'w+') as fd:
-            fd.write('Hello, world!')
+            fd.write(self._config.dump_yaml())
 
 
 # TODO: move the following code to another file; this file should only contain

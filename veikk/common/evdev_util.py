@@ -28,6 +28,15 @@ class EvdevUtil:
         return device.name.startswith("VEIKK ")
 
     @staticmethod
+    def is_valid_keycode(code: KeyCode) -> bool:
+        """
+        Checks if keycode exists in evdev key/button input events list
+        :param code:    keycode
+        :return:        whether keycode exists in evdev input events list
+        """
+        return code in ecodes.keys
+
+    @staticmethod
     def keycode_to_str(code: KeyCode) -> str:
         """
         Some keys may have multiple aliases representations, so we take

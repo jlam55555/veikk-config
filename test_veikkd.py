@@ -39,11 +39,9 @@ config = VeikkConfig({
                                                 ecodes.KEY_0])
 }, PenTransformCommand(AffineTransform2D((0.0, 0.1564453125, 0.78125, -0.3014521782674011, 0.0, 0.9323985978968453, 0.0, 0.0, 1.0))))
 
-import yaml
-
-a = yaml.dump(config, default_flow_style=None)
-b = yaml.load(a, Loader=yaml.Loader)
-c = yaml.dump(b, default_flow_style=None)
+a = config.dump_yaml()
+b = VeikkConfig.load_yaml(a)
+c = b.dump_yaml()
 
 print(a, b, c)
 print(a == c)
