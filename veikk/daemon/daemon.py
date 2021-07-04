@@ -2,7 +2,7 @@ from typing import Dict
 from evdev import InputDevice
 from pyudev import Device
 
-from .config_change_notifier import ConfigChangeNotifier
+from veikk.daemon.dbus_loop import DbusLoop
 from .event_loop import EventLoop
 from .veikk_device import VeikkDevice
 from ..common.evdev_util import EvdevUtil
@@ -26,21 +26,16 @@ class Daemon:
         # get models data
         self._models_data = VeikkModel.get_models_data()
 
-        # event loop listens in the background forever
-        self._event_loop = EventLoop()
-
         # initialize with initial set of devices; maps event path to device
         self._veikk_devices: Dict[str, VeikkDevice] = {}
         for device in EvdevUtil.get_initial_devices():
             self._add_veikk_device(device)
 
-        # start listening for device add/remove events
+        # listen to udev, dbus, evdev events
         UdevUtil.init_udev_monitor(self._add_udev_veikk_device,
                                    self._remove_udev_veikk_device)
-
-        # listen to changes
-        # TODO: change this to use dbus?
-        ConfigChangeNotifier('/tmp/veikk').listen_thread()
+        self._dbus_loop = DbusLoop(self._config)
+        self._event_loop = EventLoop()
 
     def _add_udev_veikk_device(self, udev_device: Device):
         """

@@ -28,6 +28,12 @@ class YamlSerializable:
         yaml.add_representer(self.__class__, self.to_yaml)
         yaml.add_constructor(f'!{self.__class__.__name__}', self.from_yaml)
 
+    def _verify(self) -> None:
+        """
+        Performs verification on an object after construction from YAML
+        """
+        ...
+
     def _to_yaml_dict(self) -> Dict:
         """
         Returns a dict representing the current object. Note that the keys
@@ -71,7 +77,7 @@ class YamlSerializable:
 
         # input validation
         assert isinstance(obj, cls)
-        # TODO: additional verification
+        obj._verify()
 
         return obj
 

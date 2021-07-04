@@ -1,16 +1,12 @@
-from pydbus import SystemBus
-from gi.repository import GLib
-
-from veikk.common.command.command import KeyCode, Command
-from veikk.common.command.pentransform_command import PenTransformCommand
-from veikk.common.evdev_util import EvdevUtil
-from veikk.common.veikk_config import VeikkConfig
+from .constants import VEIKK_DBUS_OBJECT
+from .command.command import KeyCode, Command
+from .command.pentransform_command import PenTransformCommand
+from .evdev_util import EvdevUtil
+from .veikk_config import VeikkConfig
 
 
-VEIKK_DBUS_OBJECT = 'com.veikk.veikkd.VeikkDaemon'
 
-
-class VeikkDaemonDbusObject:
+class VeikkDaemonDbus:
     """
     Definition of the VeikkDaemon object for (py)dbus
 
@@ -108,16 +104,3 @@ class VeikkDaemonDbusObject:
         """
         with open(filename, 'w+') as fd:
             fd.write(self._config.dump_yaml())
-
-
-# TODO: move the following code to another file; this file should only contain
-#   the definition of the dbus object
-
-# remote_object = bus.get('org.freedesktop.DBus',
-#                         '/org/freedesktop/DBus')
-# print(remote_object.Introspect())
-
-bus = SystemBus()
-bus.publish(VEIKK_DBUS_OBJECT, VeikkDaemonDbusObject(VeikkConfig()))
-loop = GLib.MainLoop()
-loop.run()
