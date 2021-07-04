@@ -1,9 +1,8 @@
-from .constants import VEIKK_DBUS_OBJECT
+from .constants import VEIKK_DBUS_OBJECT, VEIKK_CONFIG_LOCATION
 from .command.command import KeyCode, Command
 from .command.pentransform_command import PenTransformCommand
 from .evdev_util import EvdevUtil
 from .veikk_config import VeikkConfig
-
 
 
 class VeikkDaemonDbus:
@@ -93,6 +92,9 @@ class VeikkDaemonDbus:
         :param _device:     (not implemented)
         :param filename:    file to read from
         """
+        if filename == '':
+            filename = VEIKK_CONFIG_LOCATION
+
         with open(filename, 'r') as fd:
             self._config = VeikkConfig.load_yaml(fd.read())
 
@@ -102,5 +104,8 @@ class VeikkDaemonDbus:
         :param _device:     (not implemented)
         :param filename:    file to write to
         """
+        if filename == '':
+            filename = VEIKK_CONFIG_LOCATION
+
         with open(filename, 'w+') as fd:
             fd.write(self._config.dump_yaml())

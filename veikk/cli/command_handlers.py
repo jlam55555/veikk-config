@@ -1,11 +1,21 @@
 import subprocess
 from os import environ
+from pydbus import SystemBus
 
+from veikk.common.constants import VEIKK_DBUS_OBJECT, VEIKK_DBUS_INTERFACE
+from veikk.common.veikk_daemon_dbus import VeikkDaemonDbus
 from ..common.evdev_util import EvdevUtil
 from ..common import constants
 
 
 class CommandHandlers:
+    """
+    Handle commands emitted from running the
+    """
+
+    def __init__(self):
+        self._dbus_object: VeikkDaemonDbus \
+            = SystemBus().get(VEIKK_DBUS_OBJECT, VEIKK_DBUS_INTERFACE)
 
     @staticmethod
     def edit_config(_) -> None:
@@ -28,12 +38,23 @@ class CommandHandlers:
             subprocess.run(['xterm', '-e', '/usr/bin/nano',
                             constants.VEIKK_CONFIG_LOCATION])
 
-    @staticmethod
-    def apply_config(_) -> None:
+    def get_config(self, _) -> None:
         """
-        TODO: implement this with dbus
+        Get the current configuration.
         """
-        pass
+        print(self._dbus_object.GetCurrentConfig(0))
+
+    def apply_config(self, _) -> None:
+        """
+        Apply the settings in the conf file to the daemon.
+        """
+        self._dbus_object.LoadConfigFromFile(0, '')
+
+    def save_config(self, _) -> None:
+        """
+        Save the settings from the daemon to the conf file
+        """
+        self._dbus_object.SaveConfigToFile(0, '')
 
     @staticmethod
     def show_devices(_) -> None:

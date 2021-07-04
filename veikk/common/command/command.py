@@ -1,3 +1,4 @@
+from abc import ABC
 from enum import Enum
 from typing import Tuple
 from evdev import InputEvent, UInput
@@ -26,7 +27,7 @@ class CommandTrigger(Enum):
     KEYPRESS = 2
 
 
-class CommandTriggerMap(YamlSerializable):
+class CommandTriggerMap(YamlSerializable, ABC):
     """
     Used to indicate which trigger type(s) trigger an action.
     Used in ProgramCommand.
@@ -71,7 +72,7 @@ class CommandTriggerMap(YamlSerializable):
                         loader.construct_sequence(node)))
 
 
-class Command(YamlSerializable):
+class Command(YamlSerializable, ABC):
     """
     Some action/callback/handler for an input event from the driver. E.g.,
     button press, gesture, or pen mappings. Button and pen mappings are handled

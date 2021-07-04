@@ -27,10 +27,3 @@ class DbusLoop:
 
         # run glib's mainloop in separate thread
         Thread(target=self._event_loop.run).start()
-
-        # TODO: move the following code to another file; this file should only contain
-        #   the definition of the dbus object
-
-        # remote_object = bus.get('org.freedesktop.DBus',
-        #                         '/org/freedesktop/DBus')
-        # print(remote_object.Introspect())

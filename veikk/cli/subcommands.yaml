@@ -10,6 +10,7 @@ subcommands:
         help: get button mapping(s)
       - name: pen
         help: get pen mapping
+    func: get_config
   - name: set
     help: set mapping
     subcommands:
@@ -20,8 +21,12 @@ subcommands:
   - name: edit
     help: edit config file
     func: edit_config
+  - name: save
+    help: save settings from daemon to config file
+    func: save_config
   - name: apply
-    help: apply changes to config file
+    help: apply settings from config file to daemon
+    func: apply_config
   - name: device
     help: get VEIKK device info
     func: show_devices

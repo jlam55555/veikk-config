@@ -19,6 +19,8 @@ class CliParser:
         Entry point for CLI. Run the parser.
         """
         self._run_as_root()
+
+        self._command_handlers = CommandHandlers()
         self._parse()
 
     def _create_parser(self,
@@ -58,7 +60,7 @@ class CliParser:
         # create function (if this is a (possibly) terminal (sub)command)
         if 'func' in schema:
             def handler(args):
-                getattr(CommandHandlers, schema['func'])(args)
+                getattr(self._command_handlers, schema['func'])(args)
             parser.set_defaults(func=handler)
 
         return parser
