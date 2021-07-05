@@ -20,6 +20,15 @@ class CommandHandlers:
             = SystemBus().get(VEIKK_DBUS_OBJECT, VEIKK_DBUS_INTERFACE)
 
     @staticmethod
+    def _format_config(input_str: str) -> str:
+        """
+        Formats YAML text differently so that it is easily identifiable.
+        :param input_str:   string to format
+        :return             formatted string.
+        """
+        return f'\n##### begin YAML\n\n{input_str}\n##### end YAML\n'
+
+    @staticmethod
     def edit_config(_) -> None:
         """
         Edit configuration file. Try to use default editor, if set
@@ -49,11 +58,15 @@ class CommandHandlers:
 
         sp = args.subparser
         if sp == 'button' or sp == 'b':
-            print(config.get_button_command(args.keycode).dump_yaml())
+            print(f'Current button mapping for {args.keycode}:')
+            print(self._format_config(
+                config.get_button_command(args.keycode).dump_yaml()))
         elif sp == 'pen' or sp == 'p':
-            print(config.get_pen_command().dump_yaml())
+            print('Current pen transform:')
+            print(self._format_config(config.get_pen_command().dump_yaml()))
         else:
-            print(config_yaml)
+            print('Current configuration:')
+            print(self._format_config(config_yaml))
 
     def apply_config(self, _) -> None:
         """

@@ -7,14 +7,11 @@ subcommands:
     help: get mapping(s)
     subcommands:
       - name: button
-        help: get button mapping(s)
+        help: get button mapping
         arguments:
           - name: keycode
             type: str
             help: keycode to map
-#          - name: command
-#            type: str
-#            help: string representation of command
       - name: pen
         help: get pen mapping
     func: get_config
