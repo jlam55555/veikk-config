@@ -27,5 +27,5 @@ class VeikkModel:
         """
         with open(Path(__file__).parent / 'veikk_models.yaml') as fd:
             models_yaml = fd.read()
-        models_data = yaml.load(models_yaml, Loader=yaml.Loader)
+        models_data = yaml.safe_load(models_yaml)
         return {kwargs['name']: VeikkModel(**kwargs) for kwargs in models_data}

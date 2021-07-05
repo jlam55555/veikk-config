@@ -4,7 +4,6 @@ from typing import Dict, Any
 import sys
 import os
 import yaml
-from yaml import Loader
 
 from .command_handlers import CommandHandlers
 
@@ -86,7 +85,7 @@ class CliParser:
         with open(Path(__file__).parent / 'subcommands.yaml') as subcommands_fd:
             subcommands_yaml = subcommands_fd.read()
 
-        subcommands_schema = yaml.load(subcommands_yaml, Loader=Loader)
+        subcommands_schema = yaml.safe_load(subcommands_yaml)
         parser = self._create_parser(subcommands_schema)
         args = parser.parse_args()
         args.func(args)

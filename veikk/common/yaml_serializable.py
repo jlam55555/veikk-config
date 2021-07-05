@@ -25,7 +25,8 @@ class YamlRegisterable(type, metaclass=ABCMeta):
         assert hasattr(cls, 'from_yaml')
 
         yaml.add_representer(cls, cls.to_yaml)
-        yaml.add_constructor(f'!{cls.__name__}', cls.from_yaml)
+        yaml.add_constructor(f'!{cls.__name__}', cls.from_yaml,
+                             Loader=yaml.SafeLoader)
 
 
 class YamlSerializable(metaclass=YamlRegisterable):
@@ -92,7 +93,7 @@ class YamlSerializable(metaclass=YamlRegisterable):
         :param obj_yaml:    serialized object
         :return:            deserialized object
         """
-        obj = yaml.load(obj_yaml, Loader=Loader)
+        obj = yaml.safe_load(obj_yaml)
 
         # input validation
         assert isinstance(obj, cls)
