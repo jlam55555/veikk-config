@@ -88,6 +88,24 @@ class VeikkConfig(YamlSerializable):
         """
         self._pen_transform = command
 
+    def get_button_command(self, code: Union[KeyCode, str]) -> Command:
+        """
+        Gets the command associated with a keycode
+        :param code:
+        :return:
+        """
+        if isinstance(code, str):
+            code = EvdevUtil.str_to_keycode(code)
+
+        return self._btn_map[code]
+
+    def get_pen_command(self) -> PenTransformCommand:
+        """
+        Returns the current pen transform
+        :return:
+        """
+        return self._pen_transform
+
     def execute_event(self,
                       event: InputEvent,
                       devices: Tuple[UInput, UInput]) -> None:

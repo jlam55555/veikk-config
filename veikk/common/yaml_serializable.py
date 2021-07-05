@@ -1,3 +1,4 @@
+from abc import ABCMeta
 from typing import Dict
 
 import yaml
@@ -9,7 +10,25 @@ from yaml import Dumper, Node, Loader
 Dumper.ignore_aliases = lambda *args: True
 
 
-class YamlSerializable:
+class YamlRegisterable(type, metaclass=ABCMeta):
+    """
+    Metaclass that registers YAML representers and constructors for the type.
+    This means that all classes must be defined (and imported) before attempting
+    to load from YAML.
+    """
+
+    def __init__(cls, name, bases, clsdict):
+        super(YamlRegisterable, cls).__init__(name, bases, clsdict)
+
+        # type guards
+        assert hasattr(cls, 'to_yaml')
+        assert hasattr(cls, 'from_yaml')
+
+        yaml.add_representer(cls, cls.to_yaml)
+        yaml.add_constructor(f'!{cls.__name__}', cls.from_yaml)
+
+
+class YamlSerializable(metaclass=YamlRegisterable):
     """
     A custom implementation of representers and constructors for YAML objects
     that is slightly different from the yaml.YamlObject class. In YamlObject,
@@ -21,12 +40,11 @@ class YamlSerializable:
     the object. to_yaml() and from_yaml() do not have to be reimplemented.
     """
 
-    def __init__(self, **kwargs):
-        """
-        Set up YAML representer and constructor for this class.
-        """
-        yaml.add_representer(self.__class__, self.to_yaml)
-        yaml.add_constructor(f'!{self.__class__.__name__}', self.from_yaml)
+    # def __init__(self, **kwargs):
+    #     """
+    #     Set up YAML representer and constructor for this class.
+    #     """
+
 
     def _verify(self) -> None:
         """

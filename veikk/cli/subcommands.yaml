@@ -1,20 +1,27 @@
 # describing the subcommands that will be created with argparse
 # note that the interactive mode will be created separately and will
 # also be able to handle all of the following commands
-prog: cli
+prog: veikkctl
 subcommands:
   - name: get
     help: get mapping(s)
     subcommands:
-      - name: btn
+      - name: button
         help: get button mapping(s)
+        arguments:
+          - name: keycode
+            type: str
+            help: keycode to map
+#          - name: command
+#            type: str
+#            help: string representation of command
       - name: pen
         help: get pen mapping
     func: get_config
   - name: set
     help: set mapping
     subcommands:
-      - name: btn
+      - name: button
         help: set button mapping
       - name: pen
         help: set pen mapping

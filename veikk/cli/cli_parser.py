@@ -8,6 +8,11 @@ from yaml import Loader
 
 from .command_handlers import CommandHandlers
 
+# we need to import these classes even if unused in order to run the
+# metaclass constructor, which registers the YAML constructors
+from ..common.command.program_command import ProgramCommand
+from ..common.command.keycombo_command import KeyComboCommand
+
 
 class CliParser:
     """
@@ -40,7 +45,7 @@ class CliParser:
         assert 'prog' in schema or parent is not None
 
         # create parser: top-level
-        if 'prog' in schema:
+        if parent is None:
             parser = ArgumentParser(prog=schema['prog'])
 
         # create parser: not top-level
@@ -53,15 +58,21 @@ class CliParser:
 
         # create subcommands recursively
         if 'subcommands' in schema:
-            subparsers = parser.add_subparsers()
+            subparsers = parser.add_subparsers(dest='subparser')
             for subcommand in schema['subcommands']:
                 self._create_parser(subcommand, subparsers)
 
-        # create function (if this is a (possibly) terminal (sub)command)
+        # set any arguments
+        if 'arguments' in schema:
+            for argument in schema['arguments']:
+                parser.add_argument(argument['name'],
+                                    help=argument['help'],
+                                    type=__builtins__[argument['type']])
+
+        # set handler if set
         if 'func' in schema:
-            def handler(args):
-                getattr(self._command_handlers, schema['func'])(args)
-            parser.set_defaults(func=handler)
+            parser.set_defaults(func=getattr(self._command_handlers,
+                                             schema['func']))
 
         return parser
 

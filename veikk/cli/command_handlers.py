@@ -1,8 +1,10 @@
 import subprocess
+from argparse import Namespace
 from os import environ
 from pydbus import SystemBus
 
 from veikk.common.constants import VEIKK_DBUS_OBJECT, VEIKK_DBUS_INTERFACE
+from veikk.common.veikk_config import VeikkConfig
 from veikk.common.veikk_daemon_dbus import VeikkDaemonDbus
 from ..common.evdev_util import EvdevUtil
 from ..common import constants
@@ -28,7 +30,6 @@ class CommandHandlers:
             the user's $EDITOR envvar
 
         :param _:
-        :return:
         """
         if environ.get('EDITOR') is not None:
             subprocess.run([environ.get('EDITOR'),
@@ -38,11 +39,21 @@ class CommandHandlers:
             subprocess.run(['xterm', '-e', '/usr/bin/nano',
                             constants.VEIKK_CONFIG_LOCATION])
 
-    def get_config(self, _) -> None:
+    def get_config(self, args: Namespace) -> None:
         """
         Get the current configuration.
+        :param args:
         """
-        print(self._dbus_object.GetCurrentConfig(0))
+        config_yaml = self._dbus_object.GetCurrentConfig(0)
+        config = VeikkConfig.load_yaml(config_yaml)
+
+        sp = args.subparser
+        if sp == 'button' or sp == 'b':
+            print(config.get_button_command(args.keycode).dump_yaml())
+        elif sp == 'pen' or sp == 'p':
+            print(config.get_pen_command().dump_yaml())
+        else:
+            print(config_yaml)
 
     def apply_config(self, _) -> None:
         """
@@ -63,10 +74,13 @@ class CommandHandlers:
         will end in the word "Bundled". (Additional evdev devices created by
         the mapping daemon will end in "Pen" or "Keyboard".)
         """
-        print('Current VEIKK devices:')
-        print('\n'.join(['- ' + device.name[:-7]
+        veikk_devices = ['- ' + device.name[:-7]
                          for device in EvdevUtil.get_initial_devices()
-                         if device.name.endswith('Bundled')]))
+                         if device.name.endswith('Bundled')]
+        if len(veikk_devices) > 0:
+            print('Current VEIKK devices:' + '\n'.join(veikk_devices))
+        else:
+            print('No connected VEIKK devices found.')
 
     @staticmethod
     def show_version(_) -> None:
