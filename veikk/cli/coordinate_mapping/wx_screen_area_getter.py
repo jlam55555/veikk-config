@@ -7,7 +7,7 @@ from wx import MouseEvent
 from veikk.cli.coordinate_mapping._screen_area_getter import _ScreenAreaGetter
 
 
-def get_monitors() -> List[wx.Rect]:
+def _get_monitors() -> List[wx.Rect]:
     """
     Gets the offsets and sizes (in pixels) of all the monitors as a list of
     tuples (x_offset, y_offset, width, height).
@@ -16,17 +16,17 @@ def get_monitors() -> List[wx.Rect]:
             for idx in range(wx.Display.GetCount())]
 
 
-def get_total_screen_rect() -> wx.Rect:
+def _get_total_screen_rect() -> wx.Rect:
     """
     Returns the size of all the screens put together (the smallest rectangle
     containing the unions of all of the displays).
     """
     return reduce(lambda acc, screen: acc.Union(screen),
-                  get_monitors(),
+                  _get_monitors(),
                   wx.Rect())
 
 
-class SelectableFrame(wx.Frame):
+class _SelectableFrame(wx.Frame):
     """
     Select an area of the screen. Overlays a semitransparent window onto the
     screen and draws a rectangle as you drag it. Works with multiple monitors.
@@ -43,7 +43,7 @@ class SelectableFrame(wx.Frame):
         frame_style = wx.NO_BORDER
 
         padding = 100
-        frame_size = get_total_screen_rect().Inflate(padding).GetSize()
+        frame_size = _get_total_screen_rect().Inflate(padding).GetSize()
         frame_pos = (-sx-padding, -sy-padding)
 
         wx.Frame.__init__(self, parent, id, title,
@@ -85,29 +85,34 @@ class SelectableFrame(wx.Frame):
         dc.DrawRectangle(self.mapping_rect)
 
 
-class WxScreenAreaGetter(wx.App, _ScreenAreaGetter):
+class _SelectableFrameApp(wx.App):
     """
     wxPython app to run the screen mapping selection GUI and return the
     selected rectangle and screen size.
     """
-
     def __init__(self):
         self.frame = None
-        super(WxScreenAreaGetter, self).__init__()
+        super(_SelectableFrameApp, self).__init__()
 
     def OnInit(self):
-        self.frame = SelectableFrame()
+        self.frame = _SelectableFrame()
         return True
 
+
+class WxScreenAreaGetter(_ScreenAreaGetter):
+
+    def __init__(self):
+        self._app = _SelectableFrameApp()
+
     def get_total_screen_rect(self) -> Tuple[int, int, int, int]:
-        return get_total_screen_rect().GetSize().Get()
+        return _get_total_screen_rect().GetSize().Get()
 
     def get_monitors(self) -> List[Tuple[int, int, int, int]]:
-        return list(map(wx.Rect.Get, get_monitors()))
+        return list(map(wx.Rect.Get, _get_monitors()))
 
     def get_mapping_rect(self) -> Tuple[int, int, int, int]:
         """
         Runs the app and returns the mapped screen area.
         """
-        self.MainLoop()
-        return self.frame.mapping_rect.Get()
+        self._app.MainLoop()
+        return self._app.frame.mapping_rect.Get()

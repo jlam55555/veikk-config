@@ -26,16 +26,16 @@ class Daemon:
         # get models data
         self._models_data = VeikkModel.get_models_data()
 
-        # initialize with initial set of devices; maps event path to device
-        self._veikk_devices: Dict[str, VeikkDevice] = {}
-        for device in EvdevUtil.get_initial_devices():
-            self._add_veikk_device(device)
-
         # listen to udev, dbus, evdev events
         UdevUtil.init_udev_monitor(self._add_udev_veikk_device,
                                    self._remove_udev_veikk_device)
         self._dbus_loop = DbusLoop(self._config)
         self._event_loop = EventLoop()
+
+        # initialize with initial set of devices; maps event path to device
+        self._veikk_devices: Dict[str, VeikkDevice] = {}
+        for device in EvdevUtil.get_initial_devices():
+            self._add_veikk_device(device)
 
     def _add_udev_veikk_device(self, udev_device: Device):
         """
