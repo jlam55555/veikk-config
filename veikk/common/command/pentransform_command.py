@@ -1,4 +1,4 @@
-from typing import Tuple, Dict
+from typing import Tuple, Dict, Union, List
 from evdev import UInput, ecodes, InputEvent
 
 from .command import Command, CommandType
@@ -13,15 +13,21 @@ class PenTransformCommand(Command):
     """
 
     def __init__(self,
-                 coord_transform: AffineTransform2D = None,
-                 pressure_transform: AffineTransform1D = None) -> None:
+                 coord_transform: Union[List[float], AffineTransform2D] = None,
+                 pressure_transform: Union[List[float], AffineTransform1D]
+                 = None) -> None:
         if coord_transform is None:
             coord_transform = AffineTransform2D((1, 0, 0,
                                                  0, 1, 0,
                                                  0, 0, 1))
+        elif isinstance(coord_transform, list):
+            coord_transform = AffineTransform2D(tuple(coord_transform))
+
         if pressure_transform is None:
             pressure_transform = AffineTransform1D((1, 0,
                                                     0, 1))
+        elif isinstance(pressure_transform, list):
+            pressure_transform = AffineTransform1D(tuple(pressure_transform))
 
         self._coords: Tuple[int, int] = (0, 0)
         self._coord_transform = coord_transform
@@ -64,10 +70,11 @@ class PenTransformCommand(Command):
             devices[0].write(event.type, ecodes.ABS_X, int(value[0]))
             devices[0].write(event.type, ecodes.ABS_Y, int(value[1]))
 
-        # maybe tilt support in the future?
+        # TODO: maybe support tilt support in the future? will probably either
+        #   be a passthrough or a linear transform like the pressure transform
 
     def _to_yaml_dict(self) -> Dict:
         return {
-            'coord_transform': self._coord_transform,
-            'pressure_transform': self._pressure_transform
+            'coord_transform': list(self._coord_transform.get_matrix()),
+            'pressure_transform': list(self._pressure_transform.get_matrix())
         }

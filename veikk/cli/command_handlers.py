@@ -3,7 +3,11 @@ from argparse import Namespace
 from os import environ
 from pydbus import SystemBus
 
+from veikk.cli.coordinate_mapping._screen_area_getter import _ScreenAreaGetter
+from veikk.cli.coordinate_mapping.xlib_screen_area_getter import XlibScreenAreaGetter
+from veikk.common.command.pentransform_command import PenTransformCommand
 from veikk.common.constants import VEIKK_DBUS_OBJECT, VEIKK_DBUS_INTERFACE
+from veikk.common.transform_matrix_util import Orientation, TransformMatrixUtil
 from veikk.common.veikk_config import VeikkConfig
 from veikk.common.veikk_daemon_dbus import VeikkDaemonDbus
 from ..common.evdev_util import EvdevUtil
@@ -67,6 +71,65 @@ class CommandHandlers:
         else:
             print('Current configuration:')
             print(self._format_config(config_yaml))
+
+    def set_pen_config(self, args: Namespace) -> None:
+        """
+        Sets the pen configuration.
+
+        # TODO: input defaults
+        :param args:
+        """
+        if args.visual:
+            try:
+                from veikk.cli.coordinate_mapping.wx_screen_area_getter \
+                    import WxScreenAreaGetter
+            except ImportError:
+                print('You must install wxPython to use the visual pen'
+                      ' mapping tool.')
+                return
+            screen_area_getter = WxScreenAreaGetter()
+        else:
+            screen_area_getter = XlibScreenAreaGetter()
+
+        assert isinstance(screen_area_getter, _ScreenAreaGetter)
+
+        # print total monitor info
+        total_screen_rect = screen_area_getter.get_total_screen_rect()
+        print(f'Total screen area: {total_screen_rect[0]}x'
+              f'{total_screen_rect[1]}px')
+
+        # print monitor info, if more than one monitor
+        monitor_rects = screen_area_getter.get_monitors()
+        if len(monitor_rects) > 1:
+            print('  Monitors info:')
+            for i, monitor_rect in enumerate(monitor_rects):
+                print(f'    Monitor {i+1}:\n'
+                      f'      Offset x: {monitor_rect[0]}px\n'
+                      f'      Offset y: {monitor_rect[1]}px\n'
+                      f'      Width:    {monitor_rect[2]}px\n'
+                      f'      Height:   {monitor_rect[3]}px')
+
+        # get mapping orientation
+        orientation = ''
+        while orientation not in Orientation.__members__:
+            orientation = input('Orientation [NORMAL]: ')
+        orientation = Orientation[orientation]
+
+        # get mapping rectangle and print information
+        mapped_rect = screen_area_getter.get_mapping_rect()
+
+        # convert to transformation matrix and print
+        transform_matrix = TransformMatrixUtil.get_rotation_scale_offset_matrix(
+            orientation, total_screen_rect[0], total_screen_rect[1],
+            mapped_rect[0], mapped_rect[1], mapped_rect[2], mapped_rect[3]
+        )
+        print(f'Generated transform matrix: {transform_matrix.get_matrix()}')
+
+        # TODO: pressure mapping
+
+        # set the mapping
+        transform_command = PenTransformCommand(transform_matrix)
+        self._dbus_object.MapPen(0, transform_command.dump_yaml())
 
     def apply_config(self, _) -> None:
         """

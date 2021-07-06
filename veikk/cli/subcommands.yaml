@@ -15,13 +15,19 @@ subcommands:
       - name: pen
         help: get pen mapping
     func: get_config
-  - name: set
+  - name: map
     help: set mapping
     subcommands:
       - name: button
         help: set button mapping
       - name: pen
         help: set pen mapping
+        arguments:
+          - name: [--visual, -v]
+            dest: visual
+            action: store_true
+            help: use GUI tool
+        func: set_pen_config
   - name: edit
     help: edit config file
     func: edit_config

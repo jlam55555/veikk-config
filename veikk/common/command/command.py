@@ -1,6 +1,6 @@
 from abc import ABCMeta
 from enum import Enum
-from typing import Tuple
+from typing import Tuple, List, Union
 from evdev import InputEvent, UInput
 from yaml import Dumper, Node, Loader
 
@@ -27,7 +27,7 @@ class CommandTrigger(Enum):
     KEYPRESS = 2
 
 
-class CommandTriggerMap(YamlSerializable):
+class CommandTriggerMap:
     """
     Used to indicate which trigger type(s) trigger an action.
     Used in ProgramCommand.
@@ -38,38 +38,26 @@ class CommandTriggerMap(YamlSerializable):
         ProgramTrigger(..., CommandTriggerMap(trigger.KEYDOWN, trigger.KEYUP))
     """
 
-    def __init__(self, *trigger_map: CommandTrigger):
-        self._trigger_map = (CommandTrigger.KEYUP in trigger_map,
-                             CommandTrigger.KEYDOWN in trigger_map,
-                             CommandTrigger.KEYPRESS in trigger_map)
+    def __init__(self, *trigger_map: Union[str, CommandTrigger]):
+        self._trigger_map = (CommandTrigger.KEYUP in trigger_map
+                             or CommandTrigger.KEYUP.name in trigger_map,
+                             CommandTrigger.KEYDOWN in trigger_map
+                             or CommandTrigger.KEYDOWN.name in trigger_map,
+                             CommandTrigger.KEYPRESS in trigger_map
+                             or CommandTrigger.KEYPRESS.name in trigger_map)
         super(CommandTriggerMap, self).__init__()
 
     def __getitem__(self, item):
         return self._trigger_map[item]
 
-    @classmethod
-    def to_yaml(cls, dumper: Dumper, data: 'CommandTriggerMap') -> Node:
+    def to_list(self) -> List[str]:
         """
-        Serialize, translate numbers to names
-        :param dumper:
-        :param data:
+        Converts self to a simple serializable list of strings.
         :return:
         """
-        return dumper.represent_sequence(f'!{cls.__name__}',
-                                         [trigger_type.name
-                                          for trigger_type in CommandTrigger
-                                          if data[trigger_type.value]])
-
-    @classmethod
-    def from_yaml(cls, loader: Loader, node: Node) -> 'CommandTriggerMap':
-        """
-        Deserialize, translate names to numbers
-        :param loader:
-        :param node:
-        :return:
-        """
-        return cls(*map(lambda x: CommandTrigger[x],
-                        loader.construct_sequence(node)))
+        return [CommandTrigger(trigger_type).name
+                for trigger_type, is_trigger in enumerate(self._trigger_map)
+                if is_trigger]
 
 
 class Command(YamlSerializable):

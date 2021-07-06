@@ -1,8 +1,10 @@
-from typing import Dict, Tuple, List
+from typing import Tuple, List
+from functools import reduce
 
 import wx
 from wx import MouseEvent
-from functools import reduce
+
+from veikk.cli.coordinate_mapping._screen_area_getter import _ScreenAreaGetter
 
 
 def get_monitors() -> List[wx.Rect]:
@@ -29,7 +31,9 @@ class SelectableFrame(wx.Frame):
     Select an area of the screen. Overlays a semitransparent window onto the
     screen and draws a rectangle as you drag it. Works with multiple monitors.
 
-    Source: https://stackoverflow.com/a/57348580
+    PascalCased functions to match wxPython convention.
+
+    Based on: https://stackoverflow.com/a/57348580
     """
     selection_start, selection_end = None, None
 
@@ -48,28 +52,28 @@ class SelectableFrame(wx.Frame):
         # mapping_rect will be the output of the selectable frame
         self.mapping_rect = None
 
-        self.Bind(wx.EVT_MOTION, self.on_mouse_move)
-        self.Bind(wx.EVT_LEFT_DOWN, self.on_mouse_down)
-        self.Bind(wx.EVT_LEFT_UP, self.on_mouse_up)
-        self.Bind(wx.EVT_PAINT, self.on_paint)
+        self.Bind(wx.EVT_MOTION, self.OnMouseMove)
+        self.Bind(wx.EVT_LEFT_DOWN, self.OnMouseDown)
+        self.Bind(wx.EVT_LEFT_UP, self.OnMouseUp)
+        self.Bind(wx.EVT_PAINT, self.OnPaint)
 
         self.SetCursor(wx.Cursor(wx.CURSOR_CROSS))
         self.Show()
         self.SetTransparent(127)
 
-    def on_mouse_move(self, event: MouseEvent):
+    def OnMouseMove(self, event: MouseEvent):
         if event.Dragging() and event.LeftIsDown():
             self.selection_end = event.GetPosition()
             self.Refresh()
 
-    def on_mouse_down(self, event: wx.MouseEvent):
+    def OnMouseDown(self, event: wx.MouseEvent):
         self.selection_start = event.GetPosition()
 
-    def on_mouse_up(self, _: wx.MouseEvent):
+    def OnMouseUp(self, _: wx.MouseEvent):
         self.SetCursor(wx.Cursor(wx.CURSOR_ARROW))
         self.Destroy()
 
-    def on_paint(self, _: wx.MouseEvent):
+    def OnPaint(self, _: wx.MouseEvent):
         if self.selection_start is None or self.selection_end is None:
             return
 
@@ -81,7 +85,7 @@ class SelectableFrame(wx.Frame):
         dc.DrawRectangle(self.mapping_rect)
 
 
-class SelectableFrameApp(wx.App):
+class WxScreenAreaGetter(wx.App, _ScreenAreaGetter):
     """
     wxPython app to run the screen mapping selection GUI and return the
     selected rectangle and screen size.
@@ -89,7 +93,7 @@ class SelectableFrameApp(wx.App):
 
     def __init__(self):
         self.frame = None
-        super(SelectableFrameApp, self).__init__()
+        super(WxScreenAreaGetter, self).__init__()
 
     def OnInit(self):
         self.frame = SelectableFrame()
@@ -101,7 +105,7 @@ class SelectableFrameApp(wx.App):
     def get_monitors(self) -> List[Tuple[int, int, int, int]]:
         return list(map(wx.Rect.Get, get_monitors()))
 
-    def get_mapping_rect(self) -> Dict[str, Tuple]:
+    def get_mapping_rect(self) -> Tuple[int, int, int, int]:
         """
         Runs the app and returns the mapped screen area.
         """

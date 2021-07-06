@@ -63,12 +63,21 @@ class CliParser:
 
         # set any arguments
         if 'arguments' in schema:
-            for argument in schema['arguments']:
-                parser.add_argument(argument['name'],
-                                    help=argument['help'],
-                                    type=__builtins__[argument['type']])
+            for argument_options in schema['arguments']:
+                # get argument name and convert to array
+                argument_name = argument_options['name']
+                del argument_options['name']
+                if not isinstance(argument_name, list):
+                    argument_name = [argument_name]
 
-        # set handler if set
+                # if applicable, get argument type as string and convert to type
+                if 'type' in argument_options:
+                    argument_options['type'] = \
+                        __builtins__[argument_options['type']]
+
+                parser.add_argument(*argument_name, **argument_options)
+
+        # set handler if applicable
         if 'func' in schema:
             parser.set_defaults(func=getattr(self._command_handlers,
                                              schema['func']))

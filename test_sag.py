@@ -1,8 +1,8 @@
 # testing the screen area grabber
 # will remove this script as soon as I find out whether
 # it works with multiple monitors
-from veikk.cli.coordinate_mapping.xlib_util import get_total_screen_rect, get_monitors
-from veikk.cli.coordinate_mapping.screen_area_grabber import SelectableFrameApp
+from veikk.cli.coordinate_mapping.xlib_screen_area_getter import get_total_screen_rect, get_monitors
+from veikk.cli.coordinate_mapping.wx_screen_area_getter import SelectableFrameApp
 from veikk.common.transform_matrix_util import TransformMatrixUtil, Orientation
 
 print(get_total_screen_rect(), get_monitors())

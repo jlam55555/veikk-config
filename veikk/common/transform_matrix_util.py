@@ -1,13 +1,10 @@
 from enum import Enum
 from typing import Tuple
 
-from yaml import Dumper, Node, Loader
-
 from veikk.common.constants import VEIKK_MAPPED_DIM
-from veikk.common.yaml_serializable import YamlSerializable
 
 
-class AffineTransformationMatrix(YamlSerializable):
+class AffineTransformationMatrix:
     """
     Representation of an affine transformation matrix (in row-major order).
 
@@ -45,24 +42,12 @@ class AffineTransformationMatrix(YamlSerializable):
     def __getitem__(self, item: Tuple) -> float:
         raise NotImplementedError()
 
-    @classmethod
-    def to_yaml(cls,
-                dumper: Dumper,
-                data: 'AffineTransformationMatrix') -> Node:
+    def get_matrix(self):
         """
-        Overwrite with simpler constructor
-        :param dumper:
-        :param data:
+        Returns underlying matrix
         :return:
         """
-        return dumper.represent_sequence(f'!{cls.__name__}',
-                                         data._matrix)
-
-    @classmethod
-    def from_yaml(cls,
-                  loader: Loader,
-                  node: Node) -> 'YamlSerializable':
-        return cls(loader.construct_sequence(node))
+        return self._matrix
 
 
 class AffineTransform2D(AffineTransformationMatrix):
