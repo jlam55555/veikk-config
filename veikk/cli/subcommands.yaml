@@ -20,6 +20,7 @@ subcommands:
     subcommands:
       - name: button
         help: set button mapping
+        func: set_button_config
       - name: pen
         help: set pen mapping
         arguments:

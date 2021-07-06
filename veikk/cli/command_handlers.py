@@ -1,6 +1,8 @@
 import subprocess
 from argparse import Namespace
 from os import environ
+
+from evdev import ecodes
 from pydbus import SystemBus
 
 from veikk.cli.coordinate_mapping._screen_area_getter import _ScreenAreaGetter
@@ -10,6 +12,9 @@ from veikk.common.constants import VEIKK_DBUS_OBJECT, VEIKK_DBUS_INTERFACE
 from veikk.common.transform_matrix_util import Orientation, TransformMatrixUtil
 from veikk.common.veikk_config import VeikkConfig
 from veikk.common.veikk_daemon_dbus import VeikkDaemonDbus
+from ..common.command.command import KeyCode, Command
+from ..common.command.keycombo_command import KeyComboCommand
+from ..common.command.program_command import ProgramCommand
 from ..common.evdev_util import EvdevUtil
 from ..common import constants
 
@@ -72,6 +77,42 @@ class CommandHandlers:
             print('Current configuration:')
             print(self._format_config(config_yaml))
 
+    def set_button_config(self, args: Namespace) -> None:
+        """
+        Sets a button configuration.
+
+        # TODO: input defaults
+        :param args:
+        """
+        keycode: KeyCode = ecodes.ecodes[input('Enter keycode to map: ')]
+
+        map_type = ''
+        while map_type not in ['p', 'k']:
+            map_type = input('Map to [p]rogram or [k]ey combination? ')
+
+        # program
+        if map_type == 'p':
+            shell_cmd = input('Input shell command to execute: ')
+            run_as_user = input('Enter user to run command as: ')
+            run_in_terminal = input('Run in terminal? [f] ') \
+                                  .lower() in ['t', 'true']
+            command = ProgramCommand(shell_cmd=shell_cmd,
+                                     run_in_terminal=run_in_terminal,
+                                     run_as_user=run_as_user)
+
+        # keyboard combination
+        else:
+            keycodes_str = \
+                input('Enter mapped keycodes as a comma-separated list: ')
+            keycodes = \
+                list(map(lambda keycode_str: ecodes.ecodes[keycode_str],
+                         keycodes_str.upper().replace(' ', '').split(',')))
+            command = KeyComboCommand(keycodes=keycodes)
+
+        # update daemon
+        assert isinstance(command, Command)
+        self._dbus_object.MapButton(0, keycode, command.dump_yaml())
+
     def set_pen_config(self, args: Namespace) -> None:
         """
         Sets the pen configuration.
@@ -103,7 +144,7 @@ class CommandHandlers:
         if len(monitor_rects) > 1:
             print('  Monitors info:')
             for i, monitor_rect in enumerate(monitor_rects):
-                print(f'    Monitor {i+1}:\n'
+                print(f'    Monitor {i + 1}:\n'
                       f'      Offset x: {monitor_rect[0]}px\n'
                       f'      Offset y: {monitor_rect[1]}px\n'
                       f'      Width:    {monitor_rect[2]}px\n'
@@ -154,7 +195,7 @@ class CommandHandlers:
                          for device in EvdevUtil.get_initial_devices()
                          if device.name.endswith('Bundled')]
         if len(veikk_devices) > 0:
-            print('Current VEIKK devices:' + '\n'.join(veikk_devices))
+            print('Current VEIKK devices:\n' + '\n'.join(veikk_devices))
         else:
             print('No connected VEIKK devices found.')
 

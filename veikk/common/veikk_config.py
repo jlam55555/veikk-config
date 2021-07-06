@@ -36,21 +36,21 @@ class VeikkConfig(YamlSerializable):
     _noop = NoopCommand()
 
     def __init__(self,
-                 btn_map: Dict[Union[str, KeyCode], Command] = None,
+                 button_map: Dict[Union[str, KeyCode], Command] = None,
                  pen_transform: PenTransformCommand = None):
-        if btn_map is None:
-            btn_map = {}
+        if button_map is None:
+            button_map = {}
         if pen_transform is None:
             pen_transform = PenTransformCommand()
 
         # if btn_map keys are strings, convert them to keycodes
         # wrap .keys() in list() because we modify the keys as we iterate
-        for key in list(btn_map.keys()):
+        for key in list(button_map.keys()):
             if isinstance(key, str):
-                btn_map[EvdevUtil.str_to_keycode(key)] = btn_map[key]
-                del btn_map[key]
+                button_map[EvdevUtil.str_to_keycode(key)] = button_map[key]
+                del button_map[key]
 
-        self._btn_map = btn_map
+        self._button_map = button_map
         self._pen_transform = pen_transform
         super(VeikkConfig, self).__init__()
 
@@ -58,7 +58,7 @@ class VeikkConfig(YamlSerializable):
         """
         Verify that the configuration is valid. Checks all subcommands.
         """
-        for btn, cmd in self._btn_map.items():
+        for btn, cmd in self._button_map.items():
             assert EvdevUtil.is_valid_keycode(btn)
             assert not isinstance(cmd, PenTransformCommand)
             cmd._verify()
@@ -73,7 +73,7 @@ class VeikkConfig(YamlSerializable):
         :param command:
         """
         if code in VALID_BUTTONS_SET:
-            self._btn_map[code] = command
+            self._button_map[code] = command
 
     def unmap_button(self, code: KeyCode) -> None:
         """
@@ -97,7 +97,7 @@ class VeikkConfig(YamlSerializable):
         if isinstance(code, str):
             code = EvdevUtil.str_to_keycode(code)
 
-        return self._btn_map[code]
+        return self._button_map[code]
 
     def get_pen_command(self) -> PenTransformCommand:
         """
@@ -117,8 +117,8 @@ class VeikkConfig(YamlSerializable):
         """
         if event.type == ecodes.EV_ABS:
             self._pen_transform.execute(event, devices)
-        elif event.type == ecodes.EV_KEY and event.code in self._btn_map:
-            self._btn_map[event.code].execute(event, devices)
+        elif event.type == ecodes.EV_KEY and event.code in self._button_map:
+            self._button_map[event.code].execute(event, devices)
 
     def _to_yaml_dict(self) -> Dict:
         """
@@ -126,9 +126,9 @@ class VeikkConfig(YamlSerializable):
         :return:
         """
         return {
-            "btn_map": {
+            "button_map": {
                 EvdevUtil.keycode_to_str(keycode): command
-                for keycode, command in self._btn_map.items()
+                for keycode, command in self._button_map.items()
             },
             "pen_transform": self._pen_transform
         }
