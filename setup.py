@@ -18,9 +18,18 @@ setup(name='veikk-config',
       license='GNU General Public License v2.0',
       packages=find_packages(),
       zip_safe=False,
+      package_data={
+          '': [
+              'cli/subcommands.yaml',
+              'common/veikk_models.yaml'
+          ]
+      },
       install_requires=[
           'pyudev',
-          'evdev'
+          'evdev',
+          'pydbus',
+          'pyyaml',
+          'xlib'
       ],
       entry_points={
           'console_scripts': [
